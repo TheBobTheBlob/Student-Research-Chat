@@ -1,6 +1,8 @@
-FROM node:20
+FROM node:jod-bookworm
 WORKDIR ./
+COPY package.json .
+COPY package-lock.json .
 RUN npm install
 COPY . .
-RUN npm run build
-CMD ["npm", "run", "preview"]
+RUN npm run build --verbose
+CMD ["npm", "run", "serve"]

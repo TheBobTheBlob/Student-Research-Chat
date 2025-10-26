@@ -1,28 +1,27 @@
-version: '3.9'
 services:
-  db:
-    image: mariadb:latest
-    environment:
-      MARIADB_ROOT_PASSWORD: root
-      MARIADB_DATABASE: chatdb
-    volumes:
-      - db_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
+    db:
+        image: mariadb:latest
+        environment:
+            MARIADB_ROOT_PASSWORD: root
+            MARIADB_DATABASE: chatdb
+        volumes:
+            - db_data:/var/lib/mysql
+        ports:
+            - "3306:3306"
 
-  backend:
-    build: ./backend
-    depends_on:
-      - db
-    ports:
-      - "8000:8000"
+    backend:
+        build: ./api
+        ports:
+            - "8000:8000"
+        depends_on:
+            - db
 
-  frontend:
-    build: ./frontend
-    ports:
-      - "5173:5173"
-    depends_on:
-      - backend
+    frontend:
+        build: ./ui
+        ports:
+            - "4173:4173"
+        depends_on:
+            - backend
 
 volumes:
-  db_data:
+    db_data:
