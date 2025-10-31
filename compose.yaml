@@ -2,7 +2,7 @@ services:
     db:
         image: mariadb:latest
         environment:
-            MARIADB_ROOT_PASSWORD: root
+            MARIADB_ROOT_PASSWORD: rootpassword
             MARIADB_DATABASE: chatdb
         volumes:
             - db_data:/var/lib/mysql

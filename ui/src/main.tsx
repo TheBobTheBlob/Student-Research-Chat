@@ -1,27 +1,24 @@
-import { StrictMode } from 'react'
-import ReactDOM from 'react-dom/client'
+import { StrictMode } from "react"
+import ReactDOM from "react-dom/client"
 import {
     Outlet,
     RouterProvider,
     createRootRoute,
     createRoute,
     createRouter,
-} from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
+} from "@tanstack/react-router"
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
+import * as TanStackQueryProvider from "./integrations/tanstack-query/root-provider.tsx"
 
-import Header from './components/Header'
+import "./styles.css"
+import reportWebVitals from "./reportWebVitals.ts"
 
-import * as TanStackQueryProvider from './integrations/tanstack-query/root-provider.tsx'
-
-import './styles.css'
-import reportWebVitals from './reportWebVitals.ts'
-
-import App from './App.tsx'
+import App from "./App.tsx"
+import { ThemeProvider } from "./components/ThemeProvider.tsx"
 
 const rootRoute = createRootRoute({
     component: () => (
         <>
-            <Header />
             <Outlet />
             <TanStackRouterDevtools />
         </>
@@ -31,7 +28,7 @@ const rootRoute = createRootRoute({
 
 const indexRoute = createRoute({
     getParentRoute: () => rootRoute,
-    path: '/',
+    path: "/",
     component: App,
 })
 
@@ -43,25 +40,27 @@ const router = createRouter({
     context: {
         ...TanStackQueryProviderContext,
     },
-    defaultPreload: 'intent',
+    defaultPreload: "intent",
     scrollRestoration: true,
     defaultStructuralSharing: true,
     defaultPreloadStaleTime: 0,
 })
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
     interface Register {
         router: typeof router
     }
 }
 
-const rootElement = document.getElementById('app')
+const rootElement = document.getElementById("app")
 if (rootElement && !rootElement.innerHTML) {
     const root = ReactDOM.createRoot(rootElement)
     root.render(
         <StrictMode>
             <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
-                <RouterProvider router={router} />
+                <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+                    <RouterProvider router={router} />
+                </ThemeProvider>
             </TanStackQueryProvider.Provider>
         </StrictMode>,
     )
