@@ -1,12 +1,4 @@
-import {
-    Calendar,
-    Cat,
-    CircleUser,
-    Home,
-    ListTodo,
-    MessageCircle,
-    Settings,
-} from "lucide-react"
+import { Calendar, CircleUser, Home, ListTodo, MessageCircle, Settings } from "lucide-react"
 import {
     Sidebar,
     SidebarContent,

@@ -1,38 +1,13 @@
 import { StrictMode } from "react"
 import ReactDOM from "react-dom/client"
-import {
-    Outlet,
-    RouterProvider,
-    createRootRoute,
-    createRoute,
-    createRouter,
-} from "@tanstack/react-router"
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
+import { RouterProvider, createRouter } from "@tanstack/react-router"
 import * as TanStackQueryProvider from "./integrations/tanstack-query/root-provider.tsx"
 
 import "./styles.css"
 import reportWebVitals from "./reportWebVitals.ts"
 
-import App from "./App.tsx"
 import { ThemeProvider } from "./components/ThemeProvider.tsx"
-
-const rootRoute = createRootRoute({
-    component: () => (
-        <>
-            <Outlet />
-            <TanStackRouterDevtools />
-        </>
-    ),
-    notFoundComponent: () => <div>404 Not Found</div>,
-})
-
-const indexRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: "/",
-    component: App,
-})
-
-const routeTree = rootRoute.addChildren([indexRoute])
+import { routeTree } from "./routes/routes.tsx"
 
 const TanStackQueryProviderContext = TanStackQueryProvider.getContext()
 const router = createRouter({
