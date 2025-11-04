@@ -1,15 +1,14 @@
 import { Outlet, createRootRoute, createRoute } from "@tanstack/react-router"
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
 import App from "@/App"
 import Login from "@/pages/Login"
 import Register from "@/pages/Register"
+import Profile from "@/pages/Profile"
 import { Toaster } from "@/components/ui/sonner"
 
 const rootRoute = createRootRoute({
     component: () => (
         <>
             <Outlet />
-            <TanStackRouterDevtools />
             <Toaster position="bottom-right" expand richColors closeButton />
         </>
     ),
@@ -22,16 +21,22 @@ export const indexRoute = createRoute({
     component: App,
 })
 
-const loginRoute = createRoute({
+export const loginRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: "/login",
     component: Login,
 })
 
-const registerRoute = createRoute({
+export const registerRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: "/register",
     component: Register,
 })
 
-export const routeTree = rootRoute.addChildren([indexRoute, loginRoute, registerRoute])
+export const profileRoute = createRoute({
+    getParentRoute: () => indexRoute,
+    path: "profile",
+    component: Profile,
+})
+
+export const routeTree = rootRoute.addChildren([indexRoute.addChildren([profileRoute]), loginRoute, registerRoute])

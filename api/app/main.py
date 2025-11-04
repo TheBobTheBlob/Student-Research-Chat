@@ -3,8 +3,8 @@ from db import main as db
 from contextlib import asynccontextmanager
 import time
 import logging
-from . import models
 from fastapi.middleware.cors import CORSMiddleware
+from app.routers import users
 
 
 @asynccontextmanager
@@ -14,7 +14,7 @@ async def lifespan(app: FastAPI):
             db.create_tables()
             yield
         except Exception:
-            logging.warning(f"Database not ready, retrying ({i}/10)")
+            logging.warning(f"Database not ready, retrying ({i + 1}/10)")
             time.sleep(3)
     else:
         logging.error("Could not connect to the database after 10 attempts.")
@@ -34,14 +34,4 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-
-@app.post("/register")
-async def register_user(user: models.CreateUserRequest):
-    user_id = db.create_user(user)
-    return {"user_id": user_id}
+app.include_router(users.router)
