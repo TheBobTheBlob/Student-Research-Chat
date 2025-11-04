@@ -38,7 +38,8 @@ async def login_user(user: users.LoginRequest, response: Response):
         token = db.authenticate_user(user)
     except ValueError:
         raise HTTPException(status_code=401, detail="Invalid email or password")
-    response.set_cookie(key="access_token", value=token, httponly=True, max_age=7 * 24 * 60 * 60)
+    response.set_cookie(key="access_token", value=token, httponly=True, max_age=7 * 24 * 60 * 60, secure=True, samesite="lax")
+    return {"message": "Login successful"}
 
 
 @router.post("/test-security")

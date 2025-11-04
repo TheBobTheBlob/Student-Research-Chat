@@ -98,7 +98,7 @@ def authenticate_user(session: Session, user: models.users.LoginRequest) -> str:
     if db_user and check_password(db_user.password, user.password):
         return create_access_token({"user_id": db_user.id}, expires_at=dt.timedelta(days=7))
     else:
-        raise ValueError("Your credentails are invalid")
+        raise ValueError("Your credentials are invalid")
 
 
 @session
