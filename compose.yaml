@@ -24,8 +24,6 @@ services:
             - mariadb_network
         depends_on:
             - db
-        links:
-            - "db:db"
 
     frontend:
         command: "npm run dev --verbose"
