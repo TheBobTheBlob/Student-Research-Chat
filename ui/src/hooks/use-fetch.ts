@@ -4,8 +4,9 @@ interface useFetchProps {
 }
 
 export async function useFetch({ url, data }: useFetchProps) {
-    const response = await fetch(`http://localhost:8000/${url}`, {
+    const response = await fetch(`http://localhost:8000${url}`, {
         method: "POST",
+        credentials: "include",
         headers: {
             "Content-Type": "application/json",
         },
