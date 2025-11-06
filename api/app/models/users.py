@@ -7,6 +7,11 @@ class UserType(enum.Enum):
     professor = "professor"
 
 
+class ChatRole(enum.Enum):
+    member = "member"
+    admin = "admin"
+
+
 class CreateUserRequest(BaseModel):
     first_name: str
     last_name: str

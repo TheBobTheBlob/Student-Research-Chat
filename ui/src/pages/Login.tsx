@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { indexRoute, registerRoute } from "@/routes/routes"
+import { appRoute, registerRoute } from "@/routes/routes"
 import { useFetch } from "@/hooks/use-fetch"
 import { FieldGroup } from "@/components/ui/field"
 import TextField from "@/components/forms/TextField"
@@ -23,7 +23,7 @@ export default function Login() {
             return await useFetch({ url: "/users/login", data })
         },
         onSuccess: () => {
-            navigate({ to: indexRoute.to })
+            navigate({ to: appRoute.to })
         },
         onError: (error: any) => {
             toast.error(error.message)
