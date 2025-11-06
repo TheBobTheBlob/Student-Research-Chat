@@ -1,4 +1,4 @@
-import { Calendar, CircleUser, Home, ListTodo, MessageCircle, Settings } from "lucide-react"
+import { Calendar, CircleUser, Home, ListTodo, LogOut, MessageCircle, Settings } from "lucide-react"
 import { useNavigate } from "@tanstack/react-router"
 import {
     Sidebar,
@@ -11,18 +11,29 @@ import {
     SidebarMenuItem,
 } from "./ui/sidebar"
 import { profileRoute } from "@/routes/routes"
+import { useLogout } from "@/hooks/use-logout"
+
+interface AppSideBarButton {
+    title: string
+    icon: React.ComponentType<any>
+    to?: string
+    onClick?: () => any
+}
 
 export default function AppSidebar() {
-    const dashboardButtons = [
+    const makeLogout = useLogout()
+
+    const dashboardButtons: Array<AppSideBarButton> = [
         { title: "Home", icon: Home, to: "/home" },
         { title: "Chats", icon: MessageCircle, to: "/dashboard" },
         { title: "Tasks", icon: ListTodo, to: "/Tasks" },
         { title: "Meetings", icon: Calendar, to: "/meetings" },
     ]
 
-    const footerButtons = [
+    const footerButtons: Array<AppSideBarButton> = [
         { title: "Settings", icon: Settings, to: "/settings" },
         { title: "Profile", icon: CircleUser, to: profileRoute.to },
+        { title: "Logout", icon: LogOut, onClick: makeLogout },
     ]
 
     return (
@@ -45,11 +56,7 @@ export default function AppSidebar() {
 }
 
 interface SidebarButtonsFromArrayProps {
-    buttons: Array<{
-        title: string
-        icon: React.ComponentType<any>
-        to: string
-    }>
+    buttons: Array<AppSideBarButton>
 }
 
 function SidebarButtonsFromArray({ buttons }: SidebarButtonsFromArrayProps) {
@@ -57,7 +64,16 @@ function SidebarButtonsFromArray({ buttons }: SidebarButtonsFromArrayProps) {
 
     return buttons.map((button) => (
         <SidebarMenuItem key={button.title}>
-            <SidebarMenuButton onClick={() => navigate({ to: button.to })}>
+            <SidebarMenuButton
+                onClick={() => {
+                    if (button.onClick) {
+                        button.onClick()
+                    }
+                    if (button.to) {
+                        navigate({ to: button.to })
+                    }
+                }}
+            >
                 <button.icon />
                 <span>{button.title}</span>
             </SidebarMenuButton>
