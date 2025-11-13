@@ -2,6 +2,8 @@ import { useState } from "react"
 import { Calendar, CircleUser, Home, ListTodo, LogOut, MessageCircle, Plus, Settings } from "lucide-react"
 import { useNavigate } from "@tanstack/react-router"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import * as z from "zod"
+import { useForm } from "@tanstack/react-form"
 import {
     Sidebar,
     SidebarContent,
@@ -12,25 +14,25 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "./ui/sidebar"
+import { FieldGroup } from "./ui/field"
+import TextField from "./forms/TextField"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog"
 import { Button } from "./ui/button"
 import type { AppSidebarChatButton } from "./types"
-import { chatsRoute, profileRoute } from "@/routes/routes"
+import { chatRoute, chatsRoute, profileRoute } from "@/routes/routes"
 import { useLogout } from "@/hooks/use-logout"
 import { useFetch } from "@/hooks/use-fetch"
-import {} from "@radix-ui/react-dialog"
 
 interface AppSideBarButton {
     title: string
     icon: React.ComponentType<any>
     to?: string
+    toParams?: Record<string, any>
     onClick?: () => any
 }
 
 export default function AppSidebar() {
     const makeLogout = useLogout()
-    const queryClient = useQueryClient()
-    const [dialogOpen, setDialogOpen] = useState<boolean>(false)
 
     const dashboardButtons: Array<AppSideBarButton> = [
         { title: "Home", icon: Home, to: "/home" },
@@ -53,21 +55,6 @@ export default function AppSidebar() {
         },
     })
 
-    const newChat = useMutation({
-        mutationFn: async (chatName: string) => {
-            const response = await useFetch({ url: "/chats/new", data: { name: chatName } })
-            console.log(response)
-            return response
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["chats"] })
-        },
-    })
-
-    function handleNewChat() {
-        newChat.mutate("Some Chat")
-    }
-
     return (
         <Sidebar side="left" collapsible="icon">
             <SidebarHeader></SidebarHeader>
@@ -78,55 +65,15 @@ export default function AppSidebar() {
                 </SidebarGroup>
                 <SidebarGroup>
                     <SidebarGroupLabel>Chats</SidebarGroupLabel>
-                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                        <DialogTrigger asChild>
-                            <SidebarButton title="New Chat" icon={Plus} onClick={() => setDialogOpen(true)} />
-                            {/* <Button variant="outline">
-                                <>
-                                    <Plus />
-                                    New Chat
-                                </>
-                            </Button> */}
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[425px]">
-                            <DialogHeader>
-                                <DialogTitle>New Chat</DialogTitle>
-                                <DialogDescription>Create a new group chat.</DialogDescription>
-                            </DialogHeader>
-                            {/* <div className="grid gap-4">
-                    <div className="grid gap-3">
-                        <Label htmlFor="name-1">Name</Label>
-                        <Input id="name-1" name="name" defaultValue="Pedro Duarte" />
-                    </div>
-                    <div className="grid gap-3">
-                        <Label htmlFor="username-1">Username</Label>
-                        <Input id="username-1" name="username" defaultValue="@peduarte" />
-                    </div>
-                </div> */}
-                            <DialogFooter>
-                                <DialogClose asChild>
-                                    <Button variant="outline">Cancel</Button>
-                                </DialogClose>
-                                <Button type="submit">Save changes</Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
-                    {/* <SidebarButton title="New Chat" icon={Plus} onClick={() => handleNewChat()} /> */}
+                    <NewChatDialog />
                     {chats.isPending ? null : (
                         <SidebarButtonsFromArray
-                            buttons={
-                                chats.data.map((chat: AppSidebarChatButton) => ({
-                                    title: chat.chat_name,
-                                    icon: MessageCircle,
-                                    to: `/chats/${chat.chat_uuid}`,
-                                }))
-                                // <SidebarButton
-                                //     key={chat.chat_uuid}
-                                //     title={chat.chat_name}
-                                //     icon={MessageCircle}
-                                //     to={`/chats/${chat.chat_uuid}`}
-                                // />
-                            }
+                            buttons={chats.data.map((chat: AppSidebarChatButton) => ({
+                                title: chat.chat_name,
+                                icon: MessageCircle,
+                                to: chatRoute.to,
+                                toParams: { chatUUID: chat.chat_uuid },
+                            }))}
                         />
                     )}
                 </SidebarGroup>
@@ -138,7 +85,72 @@ export default function AppSidebar() {
     )
 }
 
-function SidebarButton({ title, icon, to, onClick }: AppSideBarButton) {
+const newChatFormSchema = z.object({
+    name: z.string().min(1, "Name must be at least 1 character."),
+})
+
+function NewChatDialog() {
+    const queryClient = useQueryClient()
+    const [dialogOpen, setDialogOpen] = useState<boolean>(false)
+
+    const form = useForm({
+        defaultValues: {
+            name: "",
+        },
+        validators: {
+            onSubmit: newChatFormSchema,
+        },
+        onSubmit: ({ value }) => {
+            newChat.mutateAsync(value.name)
+        },
+    })
+
+    const newChat = useMutation({
+        mutationFn: async (chatName: string) => {
+            const response = await useFetch({ url: "/chats/new", data: { name: chatName } })
+            console.log(response)
+            return response
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["chats"] })
+        },
+    })
+
+    return (
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+                <SidebarButton title="New Chat" icon={Plus} onClick={() => setDialogOpen(true)} />
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>New Chat</DialogTitle>
+                    <DialogDescription>Create a new group chat.</DialogDescription>
+                </DialogHeader>
+                <form
+                    id="new-chat-form"
+                    onSubmit={(e) => {
+                        e.preventDefault()
+                        form.handleSubmit()
+                    }}
+                >
+                    <FieldGroup>
+                        <TextField form={form} name="name" label="Name" />
+                    </FieldGroup>
+                </form>
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <Button type="submit" form="new-chat-form" onClick={() => setDialogOpen(false)}>
+                        Save changes
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+function SidebarButton({ title, icon, to, toParams, onClick }: AppSideBarButton) {
     const navigate = useNavigate()
     const Icon = icon
 
@@ -150,7 +162,7 @@ function SidebarButton({ title, icon, to, onClick }: AppSideBarButton) {
                         onClick()
                     }
                     if (to) {
-                        navigate({ to: to })
+                        navigate({ to: to, params: toParams || {} })
                     }
                 }}
             >

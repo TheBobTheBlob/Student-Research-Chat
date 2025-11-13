@@ -74,14 +74,14 @@ export const chatsRoute = createRoute({
 })
 
 export const chatRoute = createRoute({
-    getParentRoute: () => chatsRoute,
-    path: ":chatUUID",
+    getParentRoute: () => appRoute,
+    path: "chat/$chatUUID",
     component: Chat,
 })
 
 export const routeTree = rootRoute.addChildren([
     indexRoute,
-    appRoute.addChildren([profileRoute, chatsRoute.addChildren([chatRoute])]),
+    appRoute.addChildren([profileRoute, chatsRoute, chatRoute]),
     loginRoute,
     registerRoute,
 ])
