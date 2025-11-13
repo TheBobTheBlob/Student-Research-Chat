@@ -4,7 +4,10 @@ from contextlib import asynccontextmanager
 import time
 import logging
 from fastapi.middleware.cors import CORSMiddleware
+
+# Import routers
 from app.routers import users
+from app.routers import chats
 
 
 @asynccontextmanager
@@ -34,4 +37,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 app.include_router(users.router)
+app.include_router(chats.router)

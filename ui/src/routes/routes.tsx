@@ -6,6 +6,8 @@ import Profile from "@/pages/Profile"
 import { Toaster } from "@/components/ui/sonner"
 import Homepage from "@/pages/Homepage"
 import { useAuthenticated } from "@/hooks/use-authenticated"
+import Chats from "@/pages/Chats"
+import Chat from "@/pages/Chat"
 
 async function redirectToAppIfAuthenticated() {
     const isAuth = await useAuthenticated()
@@ -65,5 +67,21 @@ export const profileRoute = createRoute({
     path: "profile",
     component: Profile,
 })
+export const chatsRoute = createRoute({
+    getParentRoute: () => appRoute,
+    path: "chats",
+    component: Chats,
+})
 
-export const routeTree = rootRoute.addChildren([indexRoute, appRoute.addChildren([profileRoute]), loginRoute, registerRoute])
+export const chatRoute = createRoute({
+    getParentRoute: () => chatsRoute,
+    path: ":chatUUID",
+    component: Chat,
+})
+
+export const routeTree = rootRoute.addChildren([
+    indexRoute,
+    appRoute.addChildren([profileRoute, chatsRoute.addChildren([chatRoute])]),
+    loginRoute,
+    registerRoute,
+])

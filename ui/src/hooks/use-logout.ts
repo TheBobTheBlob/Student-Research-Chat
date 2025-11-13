@@ -5,7 +5,6 @@ import { indexRoute } from "@/routes/routes"
 export function useLogout(): () => Promise<void> {
     const queryClient = useQueryClient()
 
-    console.log("Logging out...")
     const logoutFunction = async () => {
         await useFetch({ url: "/users/logout", data: {} })
         queryClient.clear()
