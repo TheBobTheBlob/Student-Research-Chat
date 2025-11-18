@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # Import routers
 from app.routers import users
 from app.routers import chats
+from app.routers import messages
 
 
 @asynccontextmanager
@@ -40,3 +41,4 @@ app.add_middleware(
 
 app.include_router(users.router)
 app.include_router(chats.router)
+app.include_router(messages.router)

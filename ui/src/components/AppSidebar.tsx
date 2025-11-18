@@ -4,6 +4,7 @@ import { useNavigate } from "@tanstack/react-router"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import * as z from "zod"
 import { useForm } from "@tanstack/react-form"
+import { toast } from "sonner"
 import {
     Sidebar,
     SidebarContent,
@@ -108,11 +109,11 @@ function NewChatDialog() {
     const newChat = useMutation({
         mutationFn: async (chatName: string) => {
             const response = await useFetch({ url: "/chats/new", data: { name: chatName } })
-            console.log(response)
             return response
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["chats"] })
+            toast.success("Chat created successfully.")
         },
     })
 
@@ -142,7 +143,7 @@ function NewChatDialog() {
                         <Button variant="outline">Cancel</Button>
                     </DialogClose>
                     <Button type="submit" form="new-chat-form" onClick={() => setDialogOpen(false)}>
-                        Save changes
+                        Create Chat
                     </Button>
                 </DialogFooter>
             </DialogContent>
@@ -179,6 +180,13 @@ interface SidebarButtonsFromArrayProps {
 
 function SidebarButtonsFromArray({ buttons }: SidebarButtonsFromArrayProps) {
     return buttons.map((button) => (
-        <SidebarButton key={button.title} title={button.title} icon={button.icon} to={button.to} onClick={button.onClick} />
+        <SidebarButton
+            key={button.title}
+            title={button.title}
+            icon={button.icon}
+            to={button.to}
+            onClick={button.onClick}
+            toParams={button.toParams}
+        />
     ))
 }

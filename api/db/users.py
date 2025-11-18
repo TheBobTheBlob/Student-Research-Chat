@@ -42,3 +42,17 @@ def get_user_by_id(session: Session, user_id: int) -> models.users.UserRow:
         email=db_user.email,
         user_type=db_user.user_type,
     )
+
+
+@session
+def get_user_by_email(session: Session, email: str) -> models.users.UserRow:
+    db_user = session.query(tables.Users).filter(tables.Users.email == email).first()
+    if db_user is None:
+        raise ValueError("User not found")
+    return models.users.UserRow(
+        user_id=db_user.user_id,
+        first_name=db_user.first_name,
+        last_name=db_user.last_name,
+        email=db_user.email,
+        user_type=db_user.user_type,
+    )

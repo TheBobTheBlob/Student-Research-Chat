@@ -47,7 +47,7 @@ class ChatUsers(Base):
 class Messages(Base):
     __tablename__ = "messages"
 
-    message_uuid: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
+    message_uuid: Mapped[str] = mapped_column(String(100), primary_key=True, nullable=False)
     chat_uuid: Mapped[str] = mapped_column(String(100), ForeignKey("chats.chat_uuid"), nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.user_id"), nullable=False)
     content: Mapped[str] = mapped_column(String(1000), nullable=False)
