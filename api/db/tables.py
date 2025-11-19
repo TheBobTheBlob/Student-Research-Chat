@@ -3,10 +3,8 @@ from sqlalchemy.orm import mapped_column, relationship, Mapped, DeclarativeBase
 import app.models as models
 import datetime as dt
 
-
 class Base(DeclarativeBase):
     pass
-
 
 class Users(Base):
     __tablename__ = "users"
@@ -19,7 +17,6 @@ class Users(Base):
     user_type: Mapped[models.users.UserType] = mapped_column(Enum(models.users.UserType), nullable=False)
 
         s = relationship("ChatUsers", back_populates="user", cascade="all, delete")
-
 
 class Chats(Base):
     __tablename__ = "chats"
