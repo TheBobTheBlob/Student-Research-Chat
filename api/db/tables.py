@@ -16,7 +16,7 @@ class Users(Base):
     password: Mapped[str] = mapped_column(String(100), nullable=False)
     user_type: Mapped[models.users.UserType] = mapped_column(Enum(models.users.UserType), nullable=False)
 
-        s = relationship("ChatUsers", back_populates="user", cascade="all, delete")
+    s = relationship("ChatUsers", back_populates="user", cascade="all, delete")
 
 class Chats(Base):
     __tablename__ = "chats"
