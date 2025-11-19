@@ -18,7 +18,7 @@ class Users(Base):
     password: Mapped[str] = mapped_column(String(100), nullable=False)
     user_type: Mapped[models.users.UserType] = mapped_column(Enum(models.users.UserType), nullable=False)
 
-    chats = relationship("ChatUsers", back_populates="user", cascade="all, delete")
+        s = relationship("ChatUsers", back_populates="user", cascade="all, delete")
 
 
 class Chats(Base):
@@ -54,3 +54,20 @@ class Messages(Base):
     timestamp: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
 
     chat = relationship("Chats", back_populates="messages")
+
+class Notes(Base):
+    __tablename__ = "notes"
+
+    note_uuid: Mapped[str] = mapped_column(String(100), primary_key=True, nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.user_id"), nullable=False)
+    content: Mapped[str] = mapped_column(String(1000), nullable=False)
+    timestamp: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
+
+    chat = relationship("Users", back_populates="notes")
+
+class NoteUsers(Base):
+    __tablename__ = "note_users"
+
+    note_uuid: Mapped[str] = mapped_column(String(100), ForeignKey("notes.chat_uuid"), nullable=False, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.user_id"), nullable=False, primary_key=True)
+    joined_at: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
