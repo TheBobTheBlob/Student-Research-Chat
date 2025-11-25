@@ -59,14 +59,3 @@ class Messages(Base):
     timestamp: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
 
     chat = relationship("Chats", back_populates="messages")
-
-class Notes(Base):
-    __tablename__= "notes"
-
-    note_uuid: Mapped[str] = mapped_column(String(100), primary_key=True, nullable=False)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.user_id"), nullable=False)
-    note_name: Mapped[str] = mapped_column(String(200), nullable=False)
-    content: Mapped[str] = mapped_column(String(5000), nullable=False)
-    timestamp: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
-
-    owner = relationship("Users", back_populates="notes")
