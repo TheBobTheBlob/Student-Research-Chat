@@ -24,8 +24,11 @@ import {
 import { FieldGroup } from "@/components/ui/field"
 import TextField from "@/components/forms/TextField"
 import UserAvatar from "@/components/UserAvatar"
+import { TaskForm } from "@/components/forms/TaskForm";
+import { TaskList } from "@/components/TaskList";
 
 export default function Chat() {
+    const queryClient = useQueryClient();
     const { chatUUID } = useParams({ strict: false })
 
     const messagesQuery = useQuery({
@@ -66,6 +69,20 @@ export default function Chat() {
                                       isOwn={msg.user_id === messagesQuery.data.current_user_id}
                                   />
                               ))}
+                        {/* Tasks Section */}
+                        <div className="tasks-section mt-6 p-4 border-t">
+                            <h3 className="font-bold text-lg mb-2">Tasks</h3>
+
+                            <TaskForm
+                                chat_uuid={chatUUID}
+                                onTaskCreated={() => {
+                                    queryClient.invalidateQueries({ queryKey: ["tasks", chatUUID] })
+                                }}
+                            />
+
+                            <TaskList chat_uuid={chatUUID} />
+                        </div>
+
                     </div>
                     <ChatInput />
                 </div>

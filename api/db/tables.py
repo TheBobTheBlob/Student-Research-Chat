@@ -30,7 +30,7 @@ class Chats(Base):
 
     messages = relationship("Messages", back_populates="chat", cascade="all, delete")
     members = relationship("ChatUsers", back_populates="chat", cascade="all, delete")
-
+    tasks = relationship("Tasks", back_populates="chat", cascade="all, delete")
 
 class ChatUsers(Base):
     __tablename__ = "chat_users"
@@ -54,3 +54,21 @@ class Messages(Base):
     timestamp: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
 
     chat = relationship("Chats", back_populates="messages")
+
+class Tasks(Base):
+    __tablename__ = "tasks"
+
+    task_uuid: Mapped[str] = mapped_column(String(36), primary_key=True)
+    chat_uuid: Mapped[str] = mapped_column(String(100), ForeignKey("chats.chat_uuid"), nullable=False)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    created_by: Mapped[int] = mapped_column(Integer,ForeignKey("users.user_id"),nullable=False)
+    assigned_to: Mapped[int | None] = mapped_column(Integer,ForeignKey("users.user_id"),nullable=True)
+    status: Mapped[str] = mapped_column(Enum("to_do", "done"),default="to_do",nullable=False)
+    priority: Mapped[str] = mapped_column(Enum("low", "medium", "high"),default="medium",nullable=False)
+    due_date: Mapped[dt.datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
+
+    chat = relationship("Chats", back_populates="tasks")
+    creator = relationship("Users", foreign_keys=[created_by])
+    assignee = relationship("Users", foreign_keys=[assigned_to])
