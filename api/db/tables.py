@@ -19,7 +19,12 @@ class Users(Base):
     user_type: Mapped[models.users.UserType] = mapped_column(Enum(models.users.UserType), nullable=False)
 
     chats = relationship("ChatUsers", back_populates="user", cascade="all, delete")
+    notes = relationship("Notes", back_populates="owner", cascade="all, delete")
 
+def user_tasks(user_id: int):
+    return session.query(tables.Tasks).filter(
+    (tables.Tasks.created_by == user_id) | (tables.Tasks.assigned_to == user_id)
+).all()
 
 class Chats(Base):
     __tablename__ = "chats"
@@ -54,3 +59,14 @@ class Messages(Base):
     timestamp: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
 
     chat = relationship("Chats", back_populates="messages")
+
+class Notes(Base):
+    __tablename__= "notes"
+
+    note_uuid: Mapped[str] = mapped_column(String(100), primary_key=True, nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.user_id"), nullable=False)
+    note_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    content: Mapped[str] = mapped_column(String(5000), nullable=False)
+    timestamp: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
+
+    owner = relationship("Users", back_populates="notes")
