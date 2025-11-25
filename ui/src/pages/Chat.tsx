@@ -6,7 +6,6 @@ import { useForm } from "@tanstack/react-form"
 import * as z from "zod"
 import { toast } from "sonner"
 import type { UseQueryResult } from "@tanstack/react-query"
-import type { UserAvatarProps } from "@/components/UserAvatar"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useFetch } from "@/hooks/use-fetch"
@@ -23,7 +22,7 @@ import {
 } from "@/components/ui/dialog"
 import { FieldGroup } from "@/components/ui/field"
 import TextField from "@/components/forms/TextField"
-import UserAvatar from "@/components/UserAvatar"
+import UserAvatar, { type UserAvatarProps } from "@/components/UserAvatar"
 
 export default function Chat() {
     const { chatUUID } = useParams({ strict: false })
@@ -112,9 +111,14 @@ function ChatMessage({ user, text, time, isOwn }: ChatMessageType) {
 }
 
 function ChatHeader() {
+    const [value, setValue] = useState("")
+
     return (
         <div className="flex gap-2 items-end p-2 sticky top-0 bg-background">
             <p className="flex-1">Chat Header</p>
+            <Button variant="outline">
+                <SendHorizonal />
+            </Button>
         </div>
     )
 }
