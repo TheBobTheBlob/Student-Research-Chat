@@ -6,7 +6,7 @@ import jwt
 import os
 from argon2 import PasswordHasher
 
-from db.main import SessionLocal
+from db.main import SessionLocal, SessionLocalWrite, SessionLocalRead
 from sqlalchemy.orm import Session
 from typing import TypeVar, ParamSpec
 
@@ -58,6 +58,38 @@ def session(func: Callable[Concatenate[Session, P], R]) -> Callable[P, R]:
             return result
         except Exception as e:
             session.rollback()
+            raise e
+        finally:
+            session.close()
+
+    return wrapper
+
+
+def write_session(func: Callable[Concatenate[Session, P], R]) -> Callable[P, R]:
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        session = SessionLocalWrite()
+        try:
+            result = func(session, *args, **kwargs)
+            session.commit()
+            return result
+        except Exception as e:
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+
+    return wrapper
+
+
+def read_session(func: Callable[Concatenate[Session, P], R]) -> Callable[P, R]:
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        session = SessionLocalRead()
+        try:
+            result = func(session, *args, **kwargs)
+            return result
+        except Exception as e:
             raise e
         finally:
             session.close()

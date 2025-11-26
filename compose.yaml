@@ -24,6 +24,7 @@ services:
             - mariadb_network
         depends_on:
             - db
+            - kafka
 
     frontend:
         command: "npm run dev --verbose"
@@ -38,6 +39,36 @@ services:
             - backend
         environment:
             - CHOKIDAR_USEPOLLING=true
+
+    kafka:
+        image: apache/kafka:latest
+        ports:
+            - "9092:9092"
+        networks:
+            - mariadb_network
+        environment:
+            KAFKA_LISTENERS: CONTROLLER://localhost:9091,HOST://0.0.0.0:9092,DOCKER://0.0.0.0:9093
+            KAFKA_ADVERTISED_LISTENERS: HOST://localhost:9092,DOCKER://kafka:9093
+            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT,HOST:PLAINTEXT
+
+            KAFKA_NODE_ID: 1
+            KAFKA_PROCESS_ROLES: broker,controller
+            KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+            KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9091
+
+            KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
+            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+    kafka-ui:
+        image: kafbat/kafka-ui:main
+        ports:
+            - 8080:8080
+        environment:
+            DYNAMIC_CONFIG_ENABLED: "true"
+            KAFKA_CLUSTERS_0_NAME: local
+            KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093
+        depends_on:
+            - kafka
 
 volumes:
     db_data:

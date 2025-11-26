@@ -4,6 +4,8 @@ from contextlib import asynccontextmanager
 import time
 import logging
 from fastapi.middleware.cors import CORSMiddleware
+from app.kafka_service import start_kafka_producer, stop_kafka_producer, consume_events
+import asyncio
 
 # Import routers
 from app.routers import users
@@ -16,13 +18,29 @@ async def lifespan(app: FastAPI):
     for i in range(10):
         try:
             db.create_tables()
-            yield
+            break
         except Exception:
             logging.warning(f"Database not ready, retrying ({i + 1}/10)")
             time.sleep(3)
     else:
         logging.error("Could not connect to the database after 10 attempts.")
         raise Exception("Database connection failed")
+
+    for i in range(10):
+        try:
+            await start_kafka_producer()
+            asyncio.create_task(consume_events())
+            break
+        except Exception:
+            logging.warning(f"Kafka not ready, retrying ({i + 1}/10)")
+            time.sleep(3)
+    else:
+        logging.error("Could not connect to the Kafka after 10 attempts.")
+        raise Exception("Kafka connection failed")
+
+    yield
+
+    await stop_kafka_producer()
 
 
 origins = [

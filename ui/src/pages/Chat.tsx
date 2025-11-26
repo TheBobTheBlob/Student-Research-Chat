@@ -54,7 +54,7 @@ export default function Chat() {
                 <div className="flex flex-col flex-1 min-h-0">
                     <ChatHeader />
                     <div id="chat" className="flex flex-col gap-2 overflow-y-auto min-h-0 p-4">
-                        {messagesQuery.isPending
+                        {messagesQuery.isPending || chatInformationQuery.isPending
                             ? null
                             : messagesQuery.data.messages?.map((msg: any) => (
                                   <ChatMessage
@@ -111,10 +111,10 @@ function ChatMessage({ user, text, time, isOwn }: ChatMessageType) {
     )
 }
 
-function ChatHeader() {
+function ChatHeader({ chatInformationQuery }: { chatInformationQuery?: UseQueryResult<any, unknown> }) {
     return (
         <div className="flex gap-2 items-end p-2 sticky top-0 bg-background">
-            <p className="flex-1">Chat Header</p>
+            {/* <p className="flex-1">{chatInformationQuery?.isPending ? "Chat" : chatInformationQuery?.data. }</p> */}
         </div>
     )
 }
@@ -136,6 +136,7 @@ function ChatInput() {
     })
 
     function handleSend() {
+        console.log("Sending message")
         const trimmed = value.trim()
         if (!trimmed) return
         sendChat.mutateAsync(trimmed)
