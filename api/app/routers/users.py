@@ -3,14 +3,27 @@ from app.dependencies import get_current_user
 import db
 import app.models.users as users
 from fastapi import Depends, Response
+import app.events as events
+from app.kafka_service import send_event, TOPIC_CHAT_EVENTS
+import uuid
 
 router = APIRouter(prefix="/users")
 
 
 @router.post("/register")
 async def register_user(user: users.CreateUserRequest):
-    user_id = db.users.create_user(user)
-    return {"user_id": user_id}
+    user_uuid = str(uuid.uuid4())
+    event = events.UserRegisteredEvent(
+        user_uuid=user_uuid,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        email=user.email,
+        password=user.password,
+        user_type=users.UserType(user.user_type.value),
+    )
+
+    await send_event(TOPIC_CHAT_EVENTS, event)
+    return {"user_uuid": user_uuid}
 
 
 @router.post("/login")

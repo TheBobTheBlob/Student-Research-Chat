@@ -20,15 +20,15 @@ def get_current_user(
     payload = db.helpers.decode_access_token(token)
 
     try:
-        user_id = payload.get("user_id")
+        user_uuid = payload.get("user_uuid")
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid login credentials")
 
-    if user_id is None:
+    if user_uuid is None:
         raise HTTPException(status_code=401, detail="Invalid login credentials")
 
     try:
-        user = db.users.get_user_by_id(user_id)
+        user = db.users.get_user_by_uuid(user_uuid)
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid login credentials")
     return user

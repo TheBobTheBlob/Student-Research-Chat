@@ -14,6 +14,6 @@ class MessageListRequest(BaseModel):
 class MessageRow(BaseModel):
     message_uuid: str
     chat_uuid: str
-    user_id: int
+    user_uuid: str
     content: str
     timestamp: dt.datetime

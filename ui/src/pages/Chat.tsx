@@ -1,4 +1,4 @@
-import { useState } from "react"
+mport { useEffect, useRef, useState } from "react"
 import { Plus, SendHorizonal } from "lucide-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useParams } from "@tanstack/react-router"
@@ -30,6 +30,7 @@ import { TaskList } from "@/components/TaskList";
 export default function Chat() {
     const queryClient = useQueryClient();
     const { chatUUID } = useParams({ strict: false })
+    const bottomRef = useRef<HTMLDivElement>(null)
 
     const messagesQuery = useQuery({
         queryKey: ["messages", "new", chatUUID],
@@ -51,22 +52,28 @@ export default function Chat() {
         enabled: !!chatUUID,
     })
 
+    useEffect(() => {
+        if (bottomRef.current) {
+            bottomRef.current.scrollIntoView({ behavior: "smooth" })
+        }
+    }, [messagesQuery.data?.messages])
+
     return (
         <>
             <div className="flex flex-row h-screen">
                 <div className="flex flex-col flex-1 min-h-0">
-                    <ChatHeader />
-                    <div id="chat" className="flex flex-col gap-2 overflow-y-auto min-h-0 p-4">
-                        {messagesQuery.isPending
+                    <ChatHeader chatInformationQuery={chatInformationQuery} />
+                    <div id="chat" className="flex-1 flex flex-col gap-2 overflow-y-auto min-h-0 p-4">
+                        {messagesQuery.isPending || chatInformationQuery.isPending
                             ? null
                             : messagesQuery.data.messages?.map((msg: any) => (
                                   <ChatMessage
                                       key={msg.message_uuid}
                                       id={msg.message_uuid}
-                                      user={chatInformationQuery.data.users[msg.user_id]}
+                                      user={chatInformationQuery.data.users[msg.user_uuid]}
                                       text={msg.content}
                                       time={new Date(msg.timestamp).toLocaleString()}
-                                      isOwn={msg.user_id === messagesQuery.data.current_user_id}
+                                      isOwn={msg.user_uuid === messagesQuery.data.current_user_uuid}
                                   />
                               ))}
                         {/* Tasks Section */}
@@ -83,6 +90,7 @@ export default function Chat() {
                             <TaskList chat_uuid={chatUUID} />
                         </div>
 
+                        <div ref={bottomRef} />
                     </div>
                     <ChatInput />
                 </div>
@@ -109,6 +117,7 @@ function ChatMessage({ user, text, time, isOwn }: ChatMessageType) {
             </div>
         )
     }
+
     return (
         <div className={`flex gap-3 items-start ${isOwn ? "justify-end" : "justify-start"}`}>
             {!isOwn ? <MessageAvatar /> : null}
@@ -118,7 +127,7 @@ function ChatMessage({ user, text, time, isOwn }: ChatMessageType) {
                         <div className="text-sm font-medium">
                             {user.first_name} {user.last_name}
                         </div>
-                        {time && <div className="text-xs text-muted-foreground mt-1">{new Date(time).toLocaleString()}</div>}
+                        {time && <div className="text-xs text-muted-foreground mt-1">{new Date(`${time} UTC`).toLocaleString()}</div>}
                     </div>
                     <div className="text-sm mt-1 whitespace-pre-wrap">{text}</div>
                 </div>
@@ -128,10 +137,14 @@ function ChatMessage({ user, text, time, isOwn }: ChatMessageType) {
     )
 }
 
-function ChatHeader() {
+interface ChatHeaderProps {
+    chatInformationQuery: UseQueryResult<any, unknown>
+}
+
+function ChatHeader({ chatInformationQuery }: ChatHeaderProps) {
     return (
-        <div className="flex gap-2 items-end p-2 sticky top-0 bg-background">
-            <p className="flex-1">Chat Header</p>
+        <div className="flex gap-2 items-end p-2 sticky top-0 bg-background bg-sidebar">
+            <h2 className="flex-1">{chatInformationQuery.isPending ? "Chat" : chatInformationQuery.data.chat_name}</h2>
         </div>
     )
 }
@@ -159,7 +172,7 @@ function ChatInput() {
     }
 
     return (
-        <div className="flex gap-2 items-end p-2 border-t sticky bottom-0 bg-sidebar">
+        <div className="flex gap-2 items-end p-2 border-t bg-sidebar">
             <Textarea
                 value={value}
                 onChange={(e: any) => setValue(e.target.value)}
@@ -197,7 +210,9 @@ function UserList({ chatInformationQuery }: UserListProps) {
                 <SidebarGroup className="gap-2">
                     {chatInformationQuery.isPending
                         ? "Loading..."
-                        : Object.entries(chatInformationQuery.data?.users).map(([userId, user]) => <UserTag key={userId} user={user} />)}
+                        : Object.entries(chatInformationQuery.data?.users).map(([userId, user]: [any, any]) => (
+                              <UserTag key={userId} user={user} />
+                          ))}
                 </SidebarGroup>
             </SidebarContent>
         </Sidebar>

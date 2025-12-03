@@ -14,5 +14,12 @@ engine = create_engine(url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
+engine_write = create_engine(url)
+SessionLocalWrite = sessionmaker(autocommit=False, autoflush=False, bind=engine_write)
+
+engine_read = create_engine(url)
+SessionLocalRead = sessionmaker(autocommit=False, autoflush=False, bind=engine_read)
+
+
 def create_tables():
-    tables.Base.metadata.create_all(engine)
+    tables.Base.metadata.create_all(engine_write)
