@@ -35,5 +35,18 @@ class UserAddedToChatEvent(Event):
     user_uuid: str
     added_by_user_uuid: str
 
+class TaskAddedToChatEvent(Event):
+    event_type: Literal["TASK_ADDED_TO_CHAT"] = "TASK_ADDED_TO_CHAT"
 
-EventUnion = Annotated[Union[MessageCreatedEvent, UserRegisteredEvent, UserAddedToChatEvent], Field(discriminator="event_type")]
+    chat_uuid: str
+    user_uuid: str
+    added_by_user_uuid: str
+
+EventUnion = Annotated[
+    Union[
+        MessageCreatedEvent, 
+        UserRegisteredEvent, 
+        UserAddedToChatEvent,
+        TaskAddedTOChatEvent,
+        ], 
+        Field(discriminator="event_type")]

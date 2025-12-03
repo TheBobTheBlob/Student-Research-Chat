@@ -8,7 +8,7 @@ import app.models.tasks as models
 from sqlalchemy.orm import Session
 
 # Create a new task
-@session
+@write_session
 def new_task(session: Session, creator_id: int, task_data: models.CreateTaskRequest) -> str:
     task_uuid = str(uuid.uuid4())
     created_at = dt.datetime.now(dt.timezone.utc)
@@ -29,7 +29,7 @@ def new_task(session: Session, creator_id: int, task_data: models.CreateTaskRequ
     return task_uuid
 
 # Get a single task by UUID
-@session
+@read_session
 def get_task(session: Session, task_uuid: str) -> models.TaskRow | None:
     task = session.query(tables.Tasks).filter(tables.Tasks.task_uuid == task_uuid).first()
     if not task:
@@ -49,7 +49,7 @@ def get_task(session: Session, task_uuid: str) -> models.TaskRow | None:
     )
 
 # List all tasks, optional filter by chat_uuid (tasks listed in chat)
-@session
+@read_session
 def all_tasks(session: Session, chat_uuid: str | None = None) -> list[models.TaskRow]:
     query = session.query(tables.Tasks)
     if chat_uuid:
@@ -77,15 +77,15 @@ def all_tasks(session: Session, chat_uuid: str | None = None) -> list[models.Tas
     return result
 
 # List all tasks for a specific user (either created by or assigned to)
-@session
-def user_tasks(user_id: int):
+@read_session
+def user_tasks(user_uuid: int):
     return session.query(tables.Tasks).filter(
-    (tables.Tasks.created_by == user_id) | (tables.Tasks.assigned_to == user_id)
+    (tables.Tasks.created_by == user_uuid) | (tables.Tasks.assigned_to == user_uuid)
 ).all()
 
 
 # Update a task
-@session
+@write_session
 def update_task(session: Session, task_data: models.UpdateTaskRequest) -> models.TaskRow | None:
     task = session.query(tables.Tasks).filter(tables.Tasks.task_uuid == task_data.task_uuid).first()
     if not task:
@@ -121,7 +121,7 @@ def update_task(session: Session, task_data: models.UpdateTaskRequest) -> models
     )
 
 # Delete a task
-@session
+@write_session
 def delete_task(session: Session, task_uuid: str) -> bool:
     task = session.query(tables.Tasks).filter(tables.Tasks.task_uuid == task_uuid).first()
     if not task:
