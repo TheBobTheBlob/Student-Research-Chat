@@ -58,8 +58,12 @@ def get_user_chats(session: Session, user_uuid: str) -> list[models.chats.ChatRo
 @read_session
 def get_chat_info(session: Session, chat_uuid: str) -> models.chats.ChatInfoResponse:
     chat_users = session.query(tables.ChatUsers).filter(tables.ChatUsers.chat_uuid == chat_uuid).all()
+    chat = session.query(tables.Chats).filter(tables.Chats.chat_uuid == chat_uuid).first()
 
-    info = models.chats.ChatInfoResponse(chat_uuid=chat_uuid, users={})
+    if not chat:
+        raise ValueError("Chat does not exist.")
+
+    info = models.chats.ChatInfoResponse(chat_uuid=chat_uuid, chat_name=chat.chat_name, users={})
     for chat_user in chat_users:
         user = users.get_user_by_uuid(chat_user.user_uuid)
         info.users[chat_user.user_uuid] = user

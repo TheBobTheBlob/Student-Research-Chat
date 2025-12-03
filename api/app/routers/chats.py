@@ -25,7 +25,11 @@ async def user_chat_list(current_user: users.UserRow = Depends(get_current_user)
 
 @router.post("/info")
 async def chat_info(chat: chats.ChatInfoRequest, current_user: users.UserRow = Depends(get_current_user)):
-    chat_info = db.chats.get_chat_info(chat.chat_uuid)
+    try:
+        chat_info = db.chats.get_chat_info(chat.chat_uuid)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Chat does not exist.")
+
     return chat_info
 
 
