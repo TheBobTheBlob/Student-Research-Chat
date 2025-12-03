@@ -7,6 +7,7 @@ import app.models.messages as messages
 import uuid
 import datetime as dt
 from app.kafka_service import send_event, TOPIC_CHAT_EVENTS
+import app.events as events
 
 
 router = APIRouter(prefix="/messages")
@@ -18,16 +19,13 @@ async def new_message(message: messages.NewMessageRequest, current_user: users.U
     message_uuid = str(uuid.uuid4())
     time = dt.datetime.now(dt.timezone.utc)
 
-    event = {
-        "type": "MESSAGE_CREATED",
-        "data": {
-            "message_uuid": message_uuid,
-            "chat_uuid": message.chat_uuid,
-            "user_id": current_user.user_id,
-            "content": message.content,
-            "timestamp": time.isoformat(),
-        },
-    }
+    event = events.MessageCreatedEvent(
+        message_uuid=message_uuid,
+        chat_uuid=message.chat_uuid,
+        user_uuid=current_user.user_uuid,
+        content=message.content,
+        timestamp=time.isoformat(),
+    )
 
     await send_event(TOPIC_CHAT_EVENTS, event)
     return {"message": "New message sent", "message_uuid": message_uuid}
@@ -36,4 +34,4 @@ async def new_message(message: messages.NewMessageRequest, current_user: users.U
 @router.post("/list")
 async def list_of_message(message: messages.MessageListRequest, current_user: users.UserRow = Depends(get_current_user)):
     messages = db.messages.all_messages(message.chat_uuid)
-    return {"message": "Messages listed", "messages": messages, "current_user_id": current_user.user_id}
+    return {"message": "Messages listed", "messages": messages, "current_user_uuid": current_user.user_uuid}

@@ -68,14 +68,16 @@ export default function AppSidebar() {
                     <SidebarGroupLabel>Chats</SidebarGroupLabel>
                     <NewChatDialog />
                     {chats.isPending ? null : (
-                        <SidebarButtonsFromArray
-                            buttons={chats.data.map((chat: AppSidebarChatButton) => ({
-                                title: chat.chat_name,
-                                icon: MessageCircle,
-                                to: chatRoute.to,
-                                toParams: { chatUUID: chat.chat_uuid },
-                            }))}
-                        />
+                        <>
+                            <SidebarButtonsFromArray
+                                buttons={chats.data.map((chat: AppSidebarChatButton) => ({
+                                    title: chat.chat_name,
+                                    icon: MessageCircle,
+                                    to: chatRoute.to,
+                                    toParams: { chatUUID: chat.chat_uuid },
+                                }))}
+                            />
+                        </>
                     )}
                 </SidebarGroup>
             </SidebarContent>

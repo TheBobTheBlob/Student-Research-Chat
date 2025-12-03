@@ -48,6 +48,8 @@ export default function Chat() {
         enabled: !!chatUUID,
     })
 
+    console.log(messagesQuery.data)
+
     return (
         <>
             <div className="flex flex-row h-screen">
@@ -60,10 +62,10 @@ export default function Chat() {
                                   <ChatMessage
                                       key={msg.message_uuid}
                                       id={msg.message_uuid}
-                                      user={chatInformationQuery.data.users[msg.user_id]}
+                                      user={chatInformationQuery.data.users[msg.user_uuid]}
                                       text={msg.content}
                                       time={new Date(msg.timestamp).toLocaleString()}
-                                      isOwn={msg.user_id === messagesQuery.data.current_user_id}
+                                      isOwn={msg.user_uuid === messagesQuery.data.current_user_uuid}
                                   />
                               ))}
                     </div>
@@ -85,6 +87,7 @@ export type ChatMessageType = {
 }
 
 function ChatMessage({ user, text, time, isOwn }: ChatMessageType) {
+    console.log(user)
     function MessageAvatar() {
         return (
             <div className="flex-none">

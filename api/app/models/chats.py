@@ -19,7 +19,7 @@ class ChatInfoRequest(BaseModel):
 
 class ChatInfoResponse(BaseModel):
     chat_uuid: str
-    users: dict[int, users.UserRow]
+    users: dict[str, users.UserRow]
 
 
 class AddUserToChatRequest(BaseModel):

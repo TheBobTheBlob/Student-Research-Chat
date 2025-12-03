@@ -1,8 +1,9 @@
-import json
 import logging
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 import db.messages
 import datetime as dt
+import app.events as events
+from pydantic import TypeAdapter
 
 KAFKA_BOOTSTRAP_SERVERS = "kafka:9093"
 TOPIC_CHAT_EVENTS = "chat-events"
@@ -22,9 +23,10 @@ async def stop_kafka_producer():
         await producer.stop()
 
 
-async def send_event(topic: str, event: dict):
+async def send_event(topic: str, event: events.Event):
     if producer:
-        await producer.send_and_wait(topic, json.dumps(event).encode("utf-8"))
+        payload = event.model_dump_json().encode("utf-8")
+        await producer.send_and_wait(topic, payload)
 
 
 async def consume_events():
@@ -34,23 +36,36 @@ async def consume_events():
         async for msg in consumer:
             try:
                 assert msg.value is not None
-                event = json.loads(msg.value.decode("utf-8"))
-                event_type = event.get("type")
-                data = event.get("data")
+                event = TypeAdapter(events.EventUnion).validate_json(msg.value.decode("utf-8"))
 
-                print(f"Processing event: {event_type}")
-
-                if event_type == "MESSAGE_CREATED":
-                    db.messages.new_message(
-                        message_uuid=data["message_uuid"],
-                        chat_uuid=data["chat_uuid"],
-                        user_id=data["user_id"],
-                        content=data["content"],
-                        time=dt.datetime.fromisoformat(data["timestamp"]),
-                    )
+                match event:
+                    case events.MessageCreatedEvent() as e:
+                        db.messages.new_message(
+                            message_uuid=e.message_uuid,
+                            chat_uuid=e.chat_uuid,
+                            user_uuid=e.user_uuid,
+                            content=e.content,
+                            time=dt.datetime.fromisoformat(e.timestamp),
+                        )
+                    case events.UserRegisteredEvent() as e:
+                        db.users.create_user(
+                            user_uuid=e.user_uuid,
+                            first_name=e.first_name,
+                            last_name=e.last_name,
+                            password=e.password,
+                            email=e.email,
+                            user_type=e.user_type,
+                        )
+                    case events.UserAddedToChatEvent() as e:
+                        db.chats.add_user_to_chat(
+                            chat_uuid=e.chat_uuid,
+                            user_uuid=e.user_uuid,
+                        )
+                    case _:
+                        logging.warning(f"Unhandled event type: {type(event)}")
 
             except Exception as e:
-                logging.error(f"Error processing message: {e}")
+                logging.error(f"Error processing event: {e}")
     except Exception as e:
         logging.error(f"Kafka consumer error: {e}")
     finally:

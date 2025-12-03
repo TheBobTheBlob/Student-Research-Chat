@@ -27,7 +27,7 @@ class CreateUserRequest(BaseModel):
 
 
 class UserRow(BaseModel):
-    user_id: int
+    user_uuid: str
     first_name: str
     last_name: str
     email: EmailStr

@@ -7,11 +7,11 @@ from sqlalchemy.orm import Session
 
 
 @write_session
-def new_message(session: Session, message_uuid: str, time: dt.datetime, chat_uuid: str, user_id: int, content: str) -> str:
+def new_message(session: Session, message_uuid: str, time: dt.datetime, chat_uuid: str, user_uuid: str, content: str) -> str:
     new_message = tables.Messages(
         message_uuid=message_uuid,
         chat_uuid=chat_uuid,
-        user_id=user_id,
+        user_uuid=user_uuid,
         content=content,
         timestamp=time,
     )
@@ -30,7 +30,7 @@ def all_messages(session: Session, chat_uuid: str) -> list[messages.MessageRow]:
             messages.MessageRow(
                 message_uuid=message.message_uuid,
                 chat_uuid=message.chat_uuid,
-                user_id=message.user_id,
+                user_uuid=message.user_uuid,
                 content=message.content,
                 timestamp=message.timestamp,
             )
