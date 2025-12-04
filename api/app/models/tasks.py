@@ -18,7 +18,7 @@ class CreateTaskRequest(BaseModel):
     chat_uuid: str
     title: str = Field(..., min_length=1)
     description: str = Field("", max_length=2000)
-    assignee_id: int | None = None
+    assignee_uuid: str | None = None
     due_date: dt.date | None = None
     priority: TaskPriority = TaskPriority.medium
 
@@ -26,8 +26,8 @@ class CreateTaskRequest(BaseModel):
 class TaskRow(BaseModel):
     task_uuid: str
     chat_uuid: str
-    creator_id: int
-    assignee_id: int | None
+    creator_uuid: str
+    assignee_uuid: int | None
     title: str
     description: str
     status: TaskStatus
@@ -40,7 +40,7 @@ class UpdateTaskRequest(BaseModel):
     task_uuid: str
     title: str | None = None
     description: str | None = None
-    assignee_id: int | None = None
+    assignee_uuid: str | None = None
     status: TaskStatus | None = None
     priority: TaskPriority | None = None
     due_date: dt.date | None = None

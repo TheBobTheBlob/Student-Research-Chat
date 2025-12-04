@@ -20,7 +20,7 @@ async def new_task(
         user_uuid=current_user.user_uuid,
         added_by_user_uuid=current_user.user_uuid,
     )
-    await send_event(TOPIC_CHAT_EVENTS, events)
+    await send_event(TOPIC_CHAT_EVENTS, event)
     return {"message": "New task created", "task_uuid": task_uuid}
 
 

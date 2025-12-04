@@ -1,4 +1,4 @@
-mport { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Plus, SendHorizonal } from "lucide-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useParams } from "@tanstack/react-router"

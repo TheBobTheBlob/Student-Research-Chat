@@ -47,6 +47,6 @@ EventUnion = Annotated[
         MessageCreatedEvent, 
         UserRegisteredEvent, 
         UserAddedToChatEvent,
-        TaskAddedTOChatEvent,
+        TaskAddedToChatEvent,
         ], 
         Field(discriminator="event_type")]
