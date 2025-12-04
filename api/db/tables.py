@@ -26,9 +26,6 @@ class Chats(Base):
     chat_name: Mapped[str] = mapped_column(String(100), nullable=False)
     created_at: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
 
-    messages = relationship("Messages", back_populates="chat", cascade="all, delete", primaryjoin="Chats.chat_uuid == foreign(Messages.chat_uuid)")
-    members = relationship("ChatUsers", back_populates="chat", cascade="all, delete", primaryjoin="Chats.chat_uuid == foreign(ChatUsers.chat_uuid)")
-    tasks = relationship("Tasks", back_populates="chat", cascade="all, delete", primaryjoin="Chats.chat_uuid == foreign(Tasks.chat_uuid)")
 
 class ChatUsers(Base):
     __tablename__ = "chat_users"
@@ -38,7 +35,6 @@ class ChatUsers(Base):
     joined_at: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
     role: Mapped[models.users.ChatRole] = mapped_column(Enum(models.users.ChatRole), default=models.users.ChatRole.member, nullable=False)
 
-    chat = relationship("Chats", back_populates="members", primaryjoin="foreign(ChatUsers.chat_uuid) == Chats.chat_uuid")
 
 class Messages(Base):
     __tablename__ = "messages"
@@ -49,7 +45,6 @@ class Messages(Base):
     content: Mapped[str] = mapped_column(String(1000), nullable=False)
     timestamp: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
 
-    chat = relationship("Chats", back_populates="messages", primaryjoin="foreign(Messages.chat_uuid) == Chats.chat_uuid")
 
 class Tasks(Base):
     __tablename__ = "tasks"
@@ -64,7 +59,3 @@ class Tasks(Base):
     priority: Mapped[str] = mapped_column(Enum("low", "medium", "high"),default="medium",nullable=False)
     due_date: Mapped[dt.datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
-
-    chat = relationship("Chats", primaryjoin="Tasks.chat_uuid == foreign(Chats.chat_uuid)", viewonly=True,)
-    creator = relationship("Users", primaryjoin="Tasks.created_by == foreign(Users.user_uuid)", viewonly=True,)
-    assignee = relationship("Users", primaryjoin="Tasks.assigned_to == foreign(Users.user_uuid)", viewonly=True,)

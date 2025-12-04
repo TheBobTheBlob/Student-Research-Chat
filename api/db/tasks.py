@@ -76,14 +76,26 @@ def all_tasks(session: Session, chat_uuid: str | None = None) -> list[models.Tas
         )
     return result
 
-# List all tasks for a specific user (either created by or assigned to)
+# List all tasks relevant to a user
 @read_session
 def user_tasks(session: Session, user_uuid: str) -> list[models.TaskRow]:
-    tasks = session.query(tables.Tasks).filter(
+    # Tasks created by or assigned to the user
+    user_direct_tasks = session.query(tables.Tasks).filter(
         (tables.Tasks.created_by == user_uuid) |
         (tables.Tasks.assigned_to == user_uuid)
-    ).all()
+    )
 
+    # Tasks in chats the user belongs to
+    user_chat_ids = session.query(tables.ChatUsers.chat_uuid).filter(
+        tables.ChatUsers.user_uuid == user_uuid
+    ).subquery()
+
+    chat_tasks = session.query(tables.Tasks).filter(
+        tables.Tasks.chat_uuid.in_(user_chat_ids)
+    )
+    
+    # Combine and remove duplicates
+    tasks = user_direct_tasks.union(chat_tasks).all()
     return [
         models.TaskRow(
             task_uuid=t.task_uuid,
@@ -99,6 +111,7 @@ def user_tasks(session: Session, user_uuid: str) -> list[models.TaskRow]:
         )
         for t in tasks
     ]
+
 
 
 # Update a task
