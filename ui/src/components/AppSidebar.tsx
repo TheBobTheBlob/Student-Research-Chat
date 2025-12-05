@@ -10,6 +10,7 @@ import {
     SidebarContent,
     SidebarFooter,
     SidebarGroup,
+    SidebarGroupAction,
     SidebarGroupLabel,
     SidebarHeader,
     SidebarMenuButton,
@@ -71,7 +72,9 @@ export default function AppSidebar() {
                 </SidebarGroup>
                 <SidebarGroup>
                     <SidebarGroupLabel>Chats</SidebarGroupLabel>
-                    <NewChatDialog />
+                    <SidebarGroupAction title="Add Chat">
+                        <NewChatDialog />
+                    </SidebarGroupAction>
                     {chats.isPending ? null : (
                         <>
                             <SidebarButtonsFromArray
@@ -131,7 +134,7 @@ function NewChatDialog() {
     return (
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-                <SidebarButton title="New Chat" icon={Plus} onClick={() => setDialogOpen(true)} />
+                <Plus onClick={() => setDialogOpen(true)} />
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>

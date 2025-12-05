@@ -10,7 +10,7 @@ import type { UserAvatarProps } from "@/components/UserAvatar"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useFetch } from "@/hooks/use-fetch"
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarMenuButton } from "@/components/ui/sidebar"
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupAction, SidebarGroupLabel, SidebarMenuButton } from "@/components/ui/sidebar"
 import {
     Dialog,
     DialogClose,
@@ -324,17 +324,19 @@ function UserList({ chatInformationQuery }: UserListProps) {
     return (
         <Sidebar side="right" className="border-l border-border">
             <SidebarContent>
-                <SidebarGroup>
-                    <SidebarGroupLabel>Actions</SidebarGroupLabel>
-                    <AddUserDialog />
-                    <AddTaskDialog />
-                </SidebarGroup>
+                <div className="h-14" />
                 <SidebarGroup>
                     <SidebarGroupLabel>Tasks</SidebarGroupLabel>
+                    <SidebarGroupAction title="Add Task">
+                        <AddTaskDialog />
+                    </SidebarGroupAction>
                     <TaskList chat_uuid={chatUUID} />
                 </SidebarGroup>
                 <SidebarGroup className="gap-2">
                     <SidebarGroupLabel>Users</SidebarGroupLabel>
+                    <SidebarGroupAction title="Add User">
+                        <AddUserDialog />
+                    </SidebarGroupAction>
                     {chatInformationQuery.isPending
                         ? "Loading..."
                         : Object.entries(chatInformationQuery.data?.users)
@@ -384,10 +386,7 @@ function AddUserDialog() {
     return (
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-                <SidebarMenuButton onClick={() => setDialogOpen(true)}>
-                    <Plus />
-                    Add User
-                </SidebarMenuButton>
+                <Plus onClick={() => setDialogOpen(true)} />
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
@@ -426,10 +425,7 @@ function AddTaskDialog() {
     return (
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-                <SidebarMenuButton>
-                    <Plus />
-                    Add Task
-                </SidebarMenuButton>
+                <Plus onClick={() => setDialogOpen(true)} />
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
