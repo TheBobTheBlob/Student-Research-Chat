@@ -2,11 +2,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export interface UserAvatarProps {
     user: { first_name: string; last_name: string; picture?: string }
+    className?: string
 }
 
-export default function UserAvatar({ user }: UserAvatarProps) {
+export default function UserAvatar({ user, className }: UserAvatarProps) {
     return (
-        <Avatar>
+        <Avatar className={className}>
             <AvatarImage src={user.picture} alt="User Picture" />
             <AvatarFallback>
                 {user.first_name[0]}

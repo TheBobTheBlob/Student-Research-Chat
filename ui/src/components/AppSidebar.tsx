@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Calendar, CircleUser, Home, ListTodo, LogOut, MessageCircle, Plus, Settings } from "lucide-react"
-import { useNavigate } from "@tanstack/react-router"
+import { useLocation, useNavigate } from "@tanstack/react-router"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import * as z from "zod"
 import { useForm } from "@tanstack/react-form"
@@ -23,6 +23,7 @@ import type { AppSidebarChatButton } from "./types"
 import { chatRoute, chatsRoute, profileRoute } from "@/routes/routes"
 import { useLogout } from "@/hooks/use-logout"
 import { useFetch } from "@/hooks/use-fetch"
+import { cn } from "@/lib/utils"
 
 interface AppSideBarButton {
     title: string
@@ -57,8 +58,13 @@ export default function AppSidebar() {
     })
 
     return (
-        <Sidebar side="left" collapsible="icon">
-            <SidebarHeader></SidebarHeader>
+        <Sidebar side="left" collapsible="icon" className="border-r border-border">
+            <SidebarHeader>
+                <div className="flex items-center gap-2 px-2 py-3 text-sidebar-foreground">
+                    <MessageCircle className="size-6" />
+                    <span className="font-semibold group-data-[collapsible=icon]:hidden">Student Chat</span>
+                </div>
+            </SidebarHeader>
             <SidebarContent>
                 <SidebarGroup>
                     <SidebarGroupLabel>Dashboards</SidebarGroupLabel>
@@ -94,6 +100,7 @@ const newChatFormSchema = z.object({
 
 function NewChatDialog() {
     const queryClient = useQueryClient()
+    const navigate = useNavigate()
     const [dialogOpen, setDialogOpen] = useState<boolean>(false)
 
     const form = useForm({
@@ -113,9 +120,12 @@ function NewChatDialog() {
             const response = await useFetch({ url: "/chats/new", data: { name: chatName } })
             return response
         },
-        onSuccess: () => {
+        onSuccess: (data: any) => {
             queryClient.invalidateQueries({ queryKey: ["chats"] })
             toast.success("Chat created successfully.")
+            if (data?.chat_uuid) {
+                navigate({ to: chatRoute.to, params: { chatUUID: data.chat_uuid } })
+            }
         },
     })
 
@@ -155,11 +165,16 @@ function NewChatDialog() {
 
 function SidebarButton({ title, icon, to, toParams, onClick }: AppSideBarButton) {
     const navigate = useNavigate()
+    const location = useLocation()
     const Icon = icon
+
+    const isActive = to ? location.pathname.startsWith(to.replace(/\$.*/, "")) : false
+    const isChatActive = to === chatRoute.to && toParams?.chatUUID ? location.pathname.includes(toParams.chatUUID) : isActive
 
     return (
         <SidebarMenuItem key={title}>
             <SidebarMenuButton
+                isActive={isChatActive}
                 onClick={() => {
                     if (onClick) {
                         onClick()
@@ -168,8 +183,17 @@ function SidebarButton({ title, icon, to, toParams, onClick }: AppSideBarButton)
                         navigate({ to: to, params: toParams || {} })
                     }
                 }}
+                className={cn(
+                    "hover:bg-accent hover:text-accent-foreground transition-colors",
+                    "data-[active=true]:bg-blue-100 data-[active=true]:text-blue-700 dark:data-[active=true]:bg-blue-900/40 dark:data-[active=true]:text-blue-300",
+                )}
             >
-                <Icon />
+                <Icon
+                    className={cn(
+                        "text-muted-foreground group-hover/menu-button:text-foreground transition-colors",
+                        isChatActive && "text-blue-600 dark:text-blue-400",
+                    )}
+                />
                 <span>{title}</span>
             </SidebarMenuButton>
         </SidebarMenuItem>

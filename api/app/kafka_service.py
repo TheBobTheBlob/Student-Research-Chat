@@ -61,6 +61,12 @@ async def consume_events():
                             chat_uuid=e.chat_uuid,
                             user_uuid=e.user_uuid,
                         )
+                    case events.ChatDeletedEvent() as e:
+                        db.messages.remove_all_messages_from_chat(chat_uuid=e.chat_uuid)
+                        db.chats.delete_all_users_from_chat(chat_uuid=e.chat_uuid)
+                        db.chats.delete_chat(chat_uuid=e.chat_uuid)
+                    case events.UserRemovedFromChatEvent() as e:
+                        db.chats.remove_user_from_chat(chat_uuid=e.chat_uuid, user_uuid=e.user_uuid)
                     case _:
                         logging.warning(f"Unhandled event type: {type(event)}")
 

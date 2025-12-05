@@ -22,7 +22,7 @@ const rootRoute = createRootRoute({
     component: () => (
         <>
             <Outlet />
-            <Toaster position="bottom-right" expand richColors closeButton />
+            <Toaster position="bottom-right" expand richColors />
         </>
     ),
     notFoundComponent: () => <div>404 Not Found</div>,

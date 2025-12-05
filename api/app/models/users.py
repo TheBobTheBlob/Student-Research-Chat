@@ -10,6 +10,7 @@ class UserType(enum.Enum):
 class ChatRole(enum.Enum):
     member = "member"
     admin = "admin"
+    removed = "removed"
 
 
 class CreateUserRequest(BaseModel):
@@ -32,6 +33,10 @@ class UserRow(BaseModel):
     last_name: str
     email: EmailStr
     user_type: UserType
+
+
+class UserChatRow(UserRow):
+    role: ChatRole
 
 
 class LoginRequest(BaseModel):

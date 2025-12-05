@@ -37,3 +37,10 @@ def all_messages(session: Session, chat_uuid: str) -> list[messages.MessageRow]:
         )
 
     return message_rows
+
+
+@write_session
+def remove_all_messages_from_chat(session: Session, chat_uuid: str) -> None:
+    messages = session.query(tables.Messages).filter(tables.Messages.chat_uuid == chat_uuid).all()
+    for message in messages:
+        session.delete(message)

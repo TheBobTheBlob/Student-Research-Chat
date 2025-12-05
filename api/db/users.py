@@ -1,13 +1,13 @@
 import datetime as dt
 import app.models as models
 from db import tables
-from db.helpers import check_password, create_access_token, hash_password, session
+from db.helpers import check_password, create_access_token, hash_password, write_session, read_session
 
 
 from sqlalchemy.orm import Session
 
 
-@session
+@write_session
 def create_user(
     session: Session, user_uuid: str, first_name: str, last_name: str, email: str, password: str, user_type: models.users.UserType
 ) -> str:
@@ -23,7 +23,7 @@ def create_user(
     return new_user.user_uuid
 
 
-@session
+@read_session
 def authenticate_user(session: Session, user: models.users.LoginRequest) -> str:
     db_user = session.query(tables.Users).filter(tables.Users.email == user.email).first()
 
@@ -33,7 +33,7 @@ def authenticate_user(session: Session, user: models.users.LoginRequest) -> str:
         raise ValueError("Your credentials are invalid")
 
 
-@session
+@read_session
 def get_user_by_uuid(session: Session, user_uuid: str) -> models.users.UserRow:
     db_user = session.query(tables.Users).filter(tables.Users.user_uuid == user_uuid).first()
     if db_user is None:
@@ -47,7 +47,7 @@ def get_user_by_uuid(session: Session, user_uuid: str) -> models.users.UserRow:
     )
 
 
-@session
+@read_session
 def get_user_by_email(session: Session, email: str) -> models.users.UserRow:
     db_user = session.query(tables.Users).filter(tables.Users.email == email).first()
     if db_user is None:

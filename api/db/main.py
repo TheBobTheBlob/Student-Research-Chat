@@ -10,8 +10,6 @@ url = URL.create(
     port=3306,
     database="chatdb",
 )
-engine = create_engine(url)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 engine_write = create_engine(url)

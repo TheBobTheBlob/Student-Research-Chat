@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
-import { Plus, SendHorizonal } from "lucide-react"
+import { LogOutIcon, MoreHorizontalIcon, Plus, SendHorizonal, Trash2Icon } from "lucide-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useParams } from "@tanstack/react-router"
+import { useNavigate, useParams } from "@tanstack/react-router"
 import { useForm } from "@tanstack/react-form"
 import * as z from "zod"
 import { toast } from "sonner"
@@ -10,7 +10,7 @@ import type { UserAvatarProps } from "@/components/UserAvatar"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useFetch } from "@/hooks/use-fetch"
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarMenuButton } from "@/components/ui/sidebar"
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarMenuButton } from "@/components/ui/sidebar"
 import {
     Dialog,
     DialogClose,
@@ -24,6 +24,9 @@ import {
 import { FieldGroup } from "@/components/ui/field"
 import TextField from "@/components/forms/TextField"
 import UserAvatar from "@/components/UserAvatar"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { chatsRoute } from "@/routes/routes"
+import { cn } from "@/lib/utils"
 
 export default function Chat() {
     const { chatUUID } = useParams({ strict: false })
@@ -102,17 +105,26 @@ function ChatMessage({ user, text, time, isOwn }: ChatMessageType) {
     }
 
     return (
-        <div className={`flex gap-3 items-start ${isOwn ? "justify-end" : "justify-start"}`}>
+        <div className={cn("flex gap-3 items-end mb-4", isOwn ? "justify-end" : "justify-start")}>
             {!isOwn ? <MessageAvatar /> : null}
-            <div className="max-w-[70%]">
-                <div className={`rounded-lg px-3 py-2 bg-secondary`}>
-                    <div className="flex items-center justify-between gap-5">
-                        <div className="text-sm font-medium">
-                            {user.first_name} {user.last_name}
-                        </div>
-                        {time && <div className="text-xs text-muted-foreground mt-1">{new Date(`${time} UTC`).toLocaleString()}</div>}
-                    </div>
-                    <div className="text-sm mt-1 whitespace-pre-wrap">{text}</div>
+            <div className={cn("max-w-[70%] flex flex-col", isOwn ? "items-end" : "items-start")}>
+                <div className="flex items-center gap-2 mb-1 px-1">
+                    <span className="text-xs text-muted-foreground font-medium">
+                        {user.first_name} {user.last_name}
+                    </span>
+                    {time && (
+                        <span className="text-xs text-muted-foreground">
+                            {new Date(time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                    )}
+                </div>
+                <div
+                    className={cn(
+                        "rounded-2xl px-4 py-2 shadow-sm text-sm whitespace-pre-wrap break-words",
+                        isOwn ? "bg-blue-600 text-white rounded-br-sm" : "bg-muted text-foreground rounded-bl-sm",
+                    )}
+                >
+                    {text}
                 </div>
             </div>
             {isOwn ? <MessageAvatar /> : null}
@@ -126,9 +138,127 @@ interface ChatHeaderProps {
 
 function ChatHeader({ chatInformationQuery }: ChatHeaderProps) {
     return (
-        <div className="flex gap-2 items-end p-2 sticky top-0 bg-background bg-sidebar">
-            <h2 className="flex-1">{chatInformationQuery.isPending ? "Chat" : chatInformationQuery.data.chat_name}</h2>
+        <div className="flex gap-2 items-center px-4 h-14 sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+            <h2 className="flex-1 text-lg font-semibold">
+                {chatInformationQuery.isPending ? "Chat" : chatInformationQuery.data.chat_name}
+            </h2>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="outline">
+                        <MoreHorizontalIcon />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuGroup>
+                        <LeaveChatDialog />
+                        <DeleteChatDialog />
+                    </DropdownMenuGroup>
+                </DropdownMenuContent>
+            </DropdownMenu>
         </div>
+    )
+}
+
+function LeaveChatDialog() {
+    const queryClient = useQueryClient()
+    const navigate = useNavigate()
+    const { chatUUID } = useParams({ strict: false })
+    const [dialogOpen, setDialogOpen] = useState<boolean>(false)
+
+    const leaveChat = useMutation({
+        mutationFn: async () => {
+            const response = await useFetch({ url: "/chats/leave", data: { chat_uuid: chatUUID } })
+            return response
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["chats"] })
+            toast.success("Successfully left the chat.")
+            navigate({ to: chatsRoute.to })
+            setDialogOpen(false)
+        },
+        onError: (error: any) => {
+            toast.error(error.message)
+            setDialogOpen(false)
+        },
+    })
+
+    return (
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <LogOutIcon />
+                    Leave Chat
+                </DropdownMenuItem>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Are you sure you want to leave this chat?</DialogTitle>
+                    <DialogDescription>
+                        You will use access to this chat and all the messages within unless you are reinvited.
+                    </DialogDescription>
+                </DialogHeader>
+
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <Button variant="destructive" onClick={() => leaveChat.mutateAsync()}>
+                        <LogOutIcon />
+                        Leave
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+function DeleteChatDialog() {
+    const queryClient = useQueryClient()
+    const navigate = useNavigate()
+    const { chatUUID } = useParams({ strict: false })
+    const [dialogOpen, setDialogOpen] = useState<boolean>(false)
+
+    const deleteChat = useMutation({
+        mutationFn: async () => {
+            const response = await useFetch({ url: "/chats/delete", data: { chat_uuid: chatUUID } })
+            return response
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["chats"] })
+            toast.success("Chat deleted successfully.")
+            navigate({ to: chatsRoute.to })
+            setDialogOpen(false)
+        },
+        onError: (error: any) => {
+            toast.error(error.message)
+            setDialogOpen(false)
+        },
+    })
+
+    return (
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <Trash2Icon />
+                    Delete Chat
+                </DropdownMenuItem>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Are you sure you want to delete this chat?</DialogTitle>
+                    <DialogDescription>This will irreversibly delete this chat and all messages within.</DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <Button variant="destructive" onClick={() => deleteChat.mutateAsync()}>
+                        <Trash2Icon />
+                        Delete
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     )
 }
 
@@ -155,24 +285,30 @@ function ChatInput() {
     }
 
     return (
-        <div className="flex gap-2 items-end p-2 border-t bg-sidebar">
-            <Textarea
-                value={value}
-                onChange={(e: any) => setValue(e.target.value)}
-                placeholder="Type a message and press Enter..."
-                rows={1}
-                onKeyDown={(e: any) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault()
-                        handleSend()
-                    }
-                }}
-                className="resize-none flex-1"
-            />
-            <Button onClick={handleSend} variant="outline">
-                <SendHorizonal />
-                Send
-            </Button>
+        <div className="p-4 bg-background border-t">
+            <div className="flex gap-2 items-end max-w-4xl mx-auto w-full">
+                <Textarea
+                    value={value}
+                    onChange={(e: any) => setValue(e.target.value)}
+                    placeholder="Type a message..."
+                    rows={1}
+                    onKeyDown={(e: any) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault()
+                            handleSend()
+                        }
+                    }}
+                    className="resize-none flex-1 min-h-[2.5rem] max-h-32"
+                />
+                <Button
+                    onClick={handleSend}
+                    size="icon"
+                    className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white rounded-full h-10 w-10"
+                >
+                    <SendHorizonal className="h-5 w-5" />
+                    <span className="sr-only">Send</span>
+                </Button>
+            </div>
         </div>
     )
 }
@@ -183,19 +319,20 @@ interface UserListProps {
 
 function UserList({ chatInformationQuery }: UserListProps) {
     return (
-        <Sidebar side="right">
-            <SidebarHeader></SidebarHeader>
+        <Sidebar side="right" className="border-l border-border">
             <SidebarContent>
                 <SidebarGroup>
-                    <SidebarGroupLabel>Users</SidebarGroupLabel>
+                    <SidebarGroupLabel>Actions</SidebarGroupLabel>
                     <AddUserDialog />
                 </SidebarGroup>
                 <SidebarGroup className="gap-2">
+                    <SidebarGroupLabel>Users</SidebarGroupLabel>
+                    {console.log(chatInformationQuery)}
                     {chatInformationQuery.isPending
                         ? "Loading..."
-                        : Object.entries(chatInformationQuery.data?.users).map(([userId, user]: [any, any]) => (
-                              <UserTag key={userId} user={user} />
-                          ))}
+                        : Object.entries(chatInformationQuery.data?.users)
+                              .filter(([_, user]: [any, any]) => user.role !== "removed")
+                              .map(([userUUID, user]: [any, any]) => <UserTag key={userUUID} user={user} />)}
                 </SidebarGroup>
             </SidebarContent>
         </Sidebar>
@@ -280,9 +417,13 @@ interface UserTagProps {
 
 function UserTag({ user }: UserTagProps) {
     return (
-        <SidebarMenuButton>
-            <UserAvatar user={user} />
-            {user.first_name} {user.last_name}
+        <SidebarMenuButton className="h-auto py-0.5">
+            <UserAvatar user={user} className="h-8 w-8" />
+            <div className="flex flex-col items-start text-sm">
+                <span className="font-medium">
+                    {user.first_name} {user.last_name}
+                </span>
+            </div>
         </SidebarMenuButton>
     )
 }

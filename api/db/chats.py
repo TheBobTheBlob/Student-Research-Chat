@@ -33,7 +33,11 @@ def new_chat(session: Session, user_uuid: str, name: str) -> str:
 
 @read_session
 def get_user_chats(session: Session, user_uuid: str) -> list[models.chats.ChatRow]:
-    chat_users = session.query(tables.ChatUsers).filter(tables.ChatUsers.user_uuid == user_uuid).all()
+    chat_users = (
+        session.query(tables.ChatUsers)
+        .filter(tables.ChatUsers.user_uuid == user_uuid, tables.ChatUsers.role != models.users.ChatRole.removed)
+        .all()
+    )
 
     chats: dict[str, tables.Chats] = {}
     for chat_user in chat_users:
@@ -66,6 +70,14 @@ def get_chat_info(session: Session, chat_uuid: str) -> models.chats.ChatInfoResp
     info = models.chats.ChatInfoResponse(chat_uuid=chat_uuid, chat_name=chat.chat_name, users={})
     for chat_user in chat_users:
         user = users.get_user_by_uuid(chat_user.user_uuid)
+        user = models.users.UserChatRow(
+            user_uuid=user.user_uuid,
+            first_name=user.first_name,
+            last_name=user.last_name,
+            email=user.email,
+            user_type=user.user_type,
+            role=chat_user.role,
+        )
         info.users[chat_user.user_uuid] = user
 
     return info
@@ -75,8 +87,14 @@ def get_chat_info(session: Session, chat_uuid: str) -> models.chats.ChatInfoResp
 def add_user_to_chat(session: Session, chat_uuid: str, user_uuid: str) -> None:
     time = dt.datetime.now(dt.timezone.utc)
 
-    if session.query(tables.ChatUsers).filter(tables.ChatUsers.chat_uuid == chat_uuid, tables.ChatUsers.user_uuid == user_uuid).first():
-        raise ValueError("User is already in the chat.")
+    user = session.query(tables.ChatUsers).filter(tables.ChatUsers.chat_uuid == chat_uuid, tables.ChatUsers.user_uuid == user_uuid).first()
+    if user:
+        if user.role != models.users.ChatRole.removed:
+            raise ValueError("User is already in the chat.")
+        else:
+            user.role = models.users.ChatRole.member
+            session.add(user)
+            return
 
     new_chat_user = tables.ChatUsers(
         chat_uuid=chat_uuid,
@@ -88,8 +106,22 @@ def add_user_to_chat(session: Session, chat_uuid: str, user_uuid: str) -> None:
 
 
 @read_session
-def get_chat_users(session: Session, chat_uuid: str) -> list[models.users.UserRow]:
-    chat_users = session.query(tables.ChatUsers).filter(tables.ChatUsers.chat_uuid == chat_uuid).all()
+def get_chat_user_relations(session: Session, chat_uuid: str, include_removed: bool = False) -> list[tables.ChatUsers]:
+    chat_users_query = session.query(tables.ChatUsers).filter(tables.ChatUsers.chat_uuid == chat_uuid)
+    if not include_removed:
+        chat_users_query = chat_users_query.filter(tables.ChatUsers.role != models.users.ChatRole.removed)
+    chat_users = chat_users_query.all()
+
+    return chat_users
+
+
+@read_session
+def get_chat_users(session: Session, chat_uuid: str, include_removed: bool = False) -> list[models.users.UserRow]:
+    chat_users_query = session.query(tables.ChatUsers).filter(tables.ChatUsers.chat_uuid == chat_uuid)
+    if not include_removed:
+        chat_users_query = chat_users_query.filter(tables.ChatUsers.role != models.users.ChatRole.removed)
+
+    chat_users = chat_users_query.all()
 
     users_list = []
     for chat_user in chat_users:
@@ -97,3 +129,35 @@ def get_chat_users(session: Session, chat_uuid: str) -> list[models.users.UserRo
         users_list.append(user)
 
     return users_list
+
+
+@write_session
+def delete_all_users_from_chat(session: Session, chat_uuid: str) -> None:
+    chat_users = session.query(tables.ChatUsers).filter(tables.ChatUsers.chat_uuid == chat_uuid).all()
+    for chat_user in chat_users:
+        session.delete(chat_user)
+
+
+@write_session
+def delete_chat(session: Session, chat_uuid: str) -> None:
+    chat = session.query(tables.Chats).filter(tables.Chats.chat_uuid == chat_uuid).first()
+    if chat:
+        session.delete(chat)
+    else:
+        raise ValueError("Chat does not exist.")
+
+
+@write_session
+def remove_user_from_chat(session: Session, chat_uuid: str, user_uuid: str) -> None:
+    chat_user = (
+        session.query(tables.ChatUsers).filter(tables.ChatUsers.chat_uuid == chat_uuid, tables.ChatUsers.user_uuid == user_uuid).first()
+    )
+
+    if not chat_user:
+        raise ValueError("User is not in the chat.")
+
+    if chat_user.role == models.users.ChatRole.admin:
+        raise ValueError("Admins cannot leave the chat.")
+
+    chat_user.role = models.users.ChatRole.removed
+    session.add(chat_user)
