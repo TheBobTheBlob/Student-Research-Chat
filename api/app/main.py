@@ -12,6 +12,7 @@ from app.routers import users
 from app.routers import chats
 from app.routers import messages
 from app.routers import tasks
+from app.routers import notes
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -60,4 +61,5 @@ app.add_middleware(
 app.include_router(users.router)
 app.include_router(chats.router)
 app.include_router(messages.router)
-app.include_router(tasks.router)    
+app.include_router(tasks.router)
+app.include_routers(notes.router)
