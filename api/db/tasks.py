@@ -114,12 +114,15 @@ def user_tasks(session: Session, user_uuid: str) -> list[models.TaskRow]:
 
 
 
-# Update a task
+# Update a task (creator only)
 @write_session
-def update_task(session: Session, task_data: models.UpdateTaskRequest) -> models.TaskRow | None:
+def update_task(session: Session, task_data: models.UpdateTaskRequest, user_uuid: str) -> models.TaskRow | None:
     task = session.query(tables.Tasks).filter(tables.Tasks.task_uuid == task_data.task_uuid).first()
     if not task:
         return None
+
+    if task.created_by != user_uuid:
+        raise PermissionError("You are not allowed to edit this task")
 
     if task_data.title is not None:
         task.title = task_data.title

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 import db
 import app.models.tasks as tasks
 import app.models.users as users
@@ -37,11 +37,16 @@ async def all_user_tasks(current_user: users.UserRow = Depends(get_current_user)
 
 
 @router.post("/update")
-async def update_task(task_update: tasks.UpdateTaskRequest, current_user: users.UserRow = Depends(get_current_user)):
-    updated_task = db.tasks.update_task(task_update)
+async def update_task(task_request: tasks.UpdateTaskRequest, current_user: users.UserRow = Depends(get_current_user)):
+    try:
+        updated_task = db.tasks.update_task(task_request, user_uuid=current_user.user_uuid)
+    except PermissionError:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You can only update tasks you created")
+
     if not updated_task:
-        raise HTTPException(status_code=404, detail="Task not found")
-    return {"message": "Task updated successfully", "task": updated_task}
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
+
+    return {"message": "Task updated", "task": updated_task}
 
 
 @router.post("/delete")

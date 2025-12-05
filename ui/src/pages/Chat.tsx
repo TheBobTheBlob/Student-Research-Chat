@@ -10,6 +10,7 @@ import type { UserAvatarProps } from "@/components/UserAvatar"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useFetch } from "@/hooks/use-fetch"
+import { useAuthenticated } from "@/hooks/use-authenticated";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarMenuButton } from "@/components/ui/sidebar"
 import {
     Dialog,
@@ -31,6 +32,11 @@ export default function Chat() {
     const queryClient = useQueryClient();
     const { chatUUID } = useParams({ strict: false })
     const bottomRef = useRef<HTMLDivElement>(null)
+
+    const { data: authData } = useQuery({
+        queryKey: ["authUser"],
+        queryFn: useAuthenticated,
+    });
 
     const messagesQuery = useQuery({
         queryKey: ["messages", "new", chatUUID],
@@ -87,7 +93,9 @@ export default function Chat() {
                                 }}
                             />
 
-                            <TaskList chat_uuid={chatUUID} />
+                            {authData && (
+                                <TaskList chat_uuid={chatUUID} currentUserUuid={authData.user_uuid} />
+                            )}
                         </div>
 
                         <div ref={bottomRef} />
