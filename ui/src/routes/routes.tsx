@@ -8,6 +8,7 @@ import Homepage from "@/pages/Homepage"
 import { useAuthenticated } from "@/hooks/use-authenticated"
 import Chats from "@/pages/Chats"
 import Chat from "@/pages/Chat"
+import TasksPage from "@/pages/Task"
 
 async function redirectToAppIfAuthenticated() {
     const isAuth = await useAuthenticated()
@@ -79,9 +80,16 @@ export const chatRoute = createRoute({
     component: Chat,
 })
 
+export const tasksRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/tasks",
+    component: TasksPage,
+})
+
 export const routeTree = rootRoute.addChildren([
     indexRoute,
     appRoute.addChildren([profileRoute, chatsRoute, chatRoute]),
     loginRoute,
     registerRoute,
+    tasksRoute,
 ])

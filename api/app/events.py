@@ -36,6 +36,14 @@ class UserAddedToChatEvent(Event):
     added_by_user_uuid: str
 
 
+class TaskAddedToChatEvent(Event):
+    event_type: Literal["TASK_ADDED_TO_CHAT"] = "TASK_ADDED_TO_CHAT"
+
+    chat_uuid: str
+    user_uuid: str
+    added_by_user_uuid: str
+
+
 class ChatDeletedEvent(Event):
     event_type: Literal["CHAT_DELETED"] = "CHAT_DELETED"
 
@@ -51,6 +59,6 @@ class UserRemovedFromChatEvent(Event):
 
 
 EventUnion = Annotated[
-    Union[MessageCreatedEvent, UserRegisteredEvent, UserAddedToChatEvent, ChatDeletedEvent, UserRemovedFromChatEvent],
+    Union[MessageCreatedEvent, UserRegisteredEvent, UserAddedToChatEvent, ChatDeletedEvent, UserRemovedFromChatEvent, TaskAddedToChatEvent],
     Field(discriminator="event_type"),
 ]

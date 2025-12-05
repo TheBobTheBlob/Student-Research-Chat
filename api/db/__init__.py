@@ -1,3 +1,3 @@
-from . import helpers, users, chats, messages
+from . import helpers, users, chats, messages, tasks
 
-__all__ = ["users", "helpers", "chats", "messages"]
+__all__ = ["users", "helpers", "chats", "messages", "tasks"]

@@ -44,3 +44,18 @@ class Messages(Base):
     user_uuid: Mapped[str] = mapped_column(String(100), nullable=False)
     content: Mapped[str] = mapped_column(String(1000), nullable=False)
     timestamp: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
+
+
+class Tasks(Base):
+    __tablename__ = "tasks"
+
+    task_uuid: Mapped[str] = mapped_column(String(36), primary_key=True)
+    chat_uuid: Mapped[str] = mapped_column(String(100), nullable=False)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    created_by: Mapped[str] = mapped_column(String(100), nullable=False)
+    assigned_to: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    status: Mapped[str] = mapped_column(Enum(models.tasks.TaskStatus), default="to_do", nullable=False)
+    priority: Mapped[str] = mapped_column(Enum(models.tasks.TaskPriority), default="medium", nullable=False)
+    due_date: Mapped[dt.datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)

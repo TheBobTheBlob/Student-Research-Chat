@@ -27,8 +27,11 @@ import UserAvatar from "@/components/UserAvatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { chatsRoute } from "@/routes/routes"
 import { cn } from "@/lib/utils"
+import { TaskForm } from "@/components/forms/TaskForm"
+import { TaskList } from "@/components/TaskList"
 
 export default function Chat() {
+    const queryClient = useQueryClient()
     const { chatUUID } = useParams({ strict: false })
     const bottomRef = useRef<HTMLDivElement>(null)
 
@@ -76,6 +79,23 @@ export default function Chat() {
                                       isOwn={msg.user_uuid === messagesQuery.data.current_user_uuid}
                                   />
                               ))}
+
+                        {/* Tasks Section */}
+                        <div className="tasks-section mt-6 p-4 border-t">
+                            <h3 className="font-bold text-lg mb-2">Tasks</h3>
+
+                            {chatUUID ? (
+                                <TaskForm
+                                    chat_uuid={chatUUID}
+                                    onTaskCreated={() => {
+                                        queryClient.invalidateQueries({ queryKey: ["tasks", chatUUID] })
+                                    }}
+                                />
+                            ) : null}
+
+                            <TaskList chat_uuid={chatUUID} />
+                        </div>
+
                         <div ref={bottomRef} />
                     </div>
                     <ChatInput />
@@ -327,7 +347,6 @@ function UserList({ chatInformationQuery }: UserListProps) {
                 </SidebarGroup>
                 <SidebarGroup className="gap-2">
                     <SidebarGroupLabel>Users</SidebarGroupLabel>
-                    {console.log(chatInformationQuery)}
                     {chatInformationQuery.isPending
                         ? "Loading..."
                         : Object.entries(chatInformationQuery.data?.users)
