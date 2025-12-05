@@ -60,6 +60,8 @@ export default function Chat() {
         }
     }, [messagesQuery.data?.messages])
 
+    console.log(messagesQuery)
+
     return (
         <>
             <div className="flex flex-row h-screen">
@@ -74,7 +76,7 @@ export default function Chat() {
                                       id={msg.message_uuid}
                                       user={chatInformationQuery.data.users[msg.user_uuid]}
                                       text={msg.content}
-                                      time={new Date(msg.timestamp).toLocaleString()}
+                                      time={new Date(`${msg.timestamp}Z`)}
                                       isOwn={msg.user_uuid === messagesQuery.data.current_user_uuid}
                                   />
                               ))}
@@ -93,7 +95,7 @@ export type ChatMessageType = {
     id: string
     user: UserAvatarProps["user"]
     text: string
-    time?: string
+    time?: Date
     avatar?: string
     isOwn?: boolean
 }
@@ -115,11 +117,7 @@ function ChatMessage({ user, text, time, isOwn }: ChatMessageType) {
                     <span className="text-xs text-muted-foreground font-medium">
                         {user.first_name} {user.last_name}
                     </span>
-                    {time && (
-                        <span className="text-xs text-muted-foreground">
-                            {new Date(time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                        </span>
-                    )}
+                    {time && <span className="text-xs text-muted-foreground">{time.toLocaleString()}</span>}
                 </div>
                 <div
                     className={cn(
