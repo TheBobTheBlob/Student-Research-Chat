@@ -1,40 +1,30 @@
 import { useQuery } from "@tanstack/react-query"
 import { useFetch } from "@/hooks/use-fetch"
+import { TaskGrid } from "@/components/TaskGrid"
 
 export default function TasksPage() {
     const tasksQuery = useQuery({
         queryKey: ["user_tasks"],
         queryFn: async () => {
-            const res = await useFetch({
-                url: "/tasks/all",
-                data: {}, // nothing needed
-            })
-            return res.tasks ?? []
+            const response = await useFetch({ url: "/tasks/all", data: {} })
+            return response.tasks ?? []
         },
     })
 
     if (tasksQuery.isLoading) {
-        return <div>Loading tasks...</div>
+        return <div className="p-8 text-center text-muted-foreground">Loading tasks...</div>
+    }
+
+    if (tasksQuery.isError) {
+        return <div className="p-8 text-center text-destructive">Error loading tasks.</div>
     }
 
     const tasks = tasksQuery.data ?? []
 
     return (
-        <div className="p-4">
-            <h1 className="text-xl font-bold mb-4">My Tasks</h1>
-
-            {tasks.length === 0 ? (
-                <div className="text-sm text-muted-foreground">No tasks found.</div>
-            ) : (
-                <div className="flex flex-col gap-2">
-                    {tasks.map((task: any) => (
-                        <div key={task.task_uuid} className="p-3 border rounded bg-muted/20">
-                            <div className="font-medium">{task.title}</div>
-                            <div className="text-xs text-muted-foreground">{task.status}</div>
-                        </div>
-                    ))}
-                </div>
-            )}
+        <div className="p-6 max-w-7xl mx-auto w-full">
+            <h1 className="text-3xl font-bold mb-8">My Tasks</h1>
+            <TaskGrid tasks={tasks} />
         </div>
     )
 }

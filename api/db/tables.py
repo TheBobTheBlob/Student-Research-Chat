@@ -1,4 +1,4 @@
-from sqlalchemy import String, Enum, DateTime
+from sqlalchemy import String, Enum, DateTime, Date
 from sqlalchemy.orm import mapped_column, Mapped, DeclarativeBase
 import app.models as models
 import datetime as dt
@@ -55,7 +55,7 @@ class Tasks(Base):
     description: Mapped[str | None] = mapped_column(String(2000), nullable=True)
     created_by: Mapped[str] = mapped_column(String(100), nullable=False)
     assigned_to: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    status: Mapped[str] = mapped_column(Enum(models.tasks.TaskStatus), default="to_do", nullable=False)
-    priority: Mapped[str] = mapped_column(Enum(models.tasks.TaskPriority), default="medium", nullable=False)
-    due_date: Mapped[dt.datetime | None] = mapped_column(DateTime, nullable=True)
+    status: Mapped[models.tasks.TaskStatus] = mapped_column(Enum(models.tasks.TaskStatus), default="to_do", nullable=False)
+    priority: Mapped[models.tasks.TaskPriority] = mapped_column(Enum(models.tasks.TaskPriority), default="medium", nullable=False)
+    due_date: Mapped[dt.date | None] = mapped_column(Date, nullable=True)
     created_at: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)

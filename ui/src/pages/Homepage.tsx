@@ -1,14 +1,44 @@
-import { useNavigate } from "@tanstack/react-router"
-import { Button } from "@/components/ui/button"
-import { loginRoute, registerRoute } from "@/routes/routes"
+import { useQuery } from "@tanstack/react-query"
+import { useFetch } from "@/hooks/use-fetch"
+import { ChatGrid } from "@/components/ChatGrid"
+import { TaskGrid } from "@/components/TaskGrid"
 
 export default function Homepage() {
-    const navigate = useNavigate()
+    const chats = useQuery({
+        queryKey: ["chats"],
+        queryFn: async () => {
+            const response = await useFetch({ url: "/chats/list", data: {} })
+            return response
+        },
+    })
+
+    const tasksQuery = useQuery({
+        queryKey: ["user_tasks"],
+        queryFn: async () => {
+            const response = await useFetch({ url: "/tasks/all", data: {} })
+            return response.tasks ?? []
+        },
+    })
+
+    if (chats.isPending || tasksQuery.isPending) {
+        return <div className="p-8 text-center text-muted-foreground">Loading dashboard...</div>
+    }
+
+    if (chats.isError || tasksQuery.isError) {
+        return <div className="p-8 text-center text-destructive">Error loading dashboard.</div>
+    }
+
     return (
-        <div>
-            <h1>This is the Homepage</h1>
-            <Button onClick={() => navigate({ to: loginRoute.to })}>Login</Button>
-            <Button onClick={() => navigate({ to: registerRoute.to })}>Register</Button>
+        <div className="p-6 max-w-7xl mx-auto w-full space-y-12">
+            <section>
+                <h2 className="text-2xl font-bold mb-6">Recent Chats</h2>
+                <ChatGrid chats={chats.data.slice(0, 6)} />
+            </section>
+
+            <section>
+                <h2 className="text-2xl font-bold mb-6">My Tasks</h2>
+                <TaskGrid tasks={tasksQuery.data.slice(0, 6)} />
+            </section>
         </div>
     )
 }

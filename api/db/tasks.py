@@ -7,6 +7,7 @@ import app.models.tasks as models
 
 from sqlalchemy.orm import Session
 
+
 # Create a new task
 @write_session
 def new_task(session: Session, creator_uuid: str, task_data: models.CreateTaskRequest) -> str:
@@ -23,10 +24,11 @@ def new_task(session: Session, creator_uuid: str, task_data: models.CreateTaskRe
         status=models.TaskStatus.to_do.value,
         priority=task_data.priority.value,
         due_date=task_data.due_date,
-        created_at=created_at
+        created_at=created_at,
     )
     session.add(new_task)
     return task_uuid
+
 
 # Get a single task by UUID
 @read_session
@@ -41,12 +43,13 @@ def get_task(session: Session, task_uuid: str) -> models.TaskRow | None:
         creator_uuid=task.created_by,
         assignee_uuid=task.assigned_to,
         title=task.title,
-        description=task.description,
+        description=task.description or "",
         status=task.status,
         priority=task.priority,
         due_date=task.due_date,
-        created_at=task.created_at
+        created_at=task.created_at,
     )
+
 
 # List all tasks, optional filter by chat_uuid (tasks listed in chat)
 @read_session
@@ -67,33 +70,26 @@ def all_tasks(session: Session, chat_uuid: str | None = None) -> list[models.Tas
                 creator_uuid=task.created_by,
                 assignee_uuid=task.assigned_to,
                 title=task.title,
-                description=task.description,
+                description=task.description or "",
                 status=task.status,
                 priority=task.priority,
                 due_date=task.due_date,
-                created_at=task.created_at
+                created_at=task.created_at,
             )
         )
     return result
+
 
 # List all tasks relevant to a user
 @read_session
 def user_tasks(session: Session, user_uuid: str) -> list[models.TaskRow]:
     # Tasks created by or assigned to the user
-    user_direct_tasks = session.query(tables.Tasks).filter(
-        (tables.Tasks.created_by == user_uuid) |
-        (tables.Tasks.assigned_to == user_uuid)
-    )
+    user_direct_tasks = session.query(tables.Tasks).filter((tables.Tasks.created_by == user_uuid) | (tables.Tasks.assigned_to == user_uuid))
 
     # Tasks in chats the user belongs to
-    user_chat_ids = session.query(tables.ChatUsers.chat_uuid).filter(
-        tables.ChatUsers.user_uuid == user_uuid
-    ).subquery()
+    user_chat_uuids = session.query(tables.ChatUsers.chat_uuid).filter(tables.ChatUsers.user_uuid == user_uuid)
+    chat_tasks = session.query(tables.Tasks).filter(tables.Tasks.chat_uuid.in_(user_chat_uuids))
 
-    chat_tasks = session.query(tables.Tasks).filter(
-        tables.Tasks.chat_uuid.in_(user_chat_ids)
-    )
-    
     # Combine and remove duplicates
     tasks = user_direct_tasks.union(chat_tasks).all()
     return [
@@ -103,15 +99,14 @@ def user_tasks(session: Session, user_uuid: str) -> list[models.TaskRow]:
             creator_uuid=t.created_by,
             assignee_uuid=t.assigned_to,
             title=t.title,
-            description=t.description,
+            description=t.description or "",
             status=t.status,
             priority=t.priority,
             due_date=t.due_date,
-            created_at=t.created_at
+            created_at=t.created_at,
         )
         for t in tasks
     ]
-
 
 
 # Update a task (creator only)
@@ -131,14 +126,13 @@ def update_task(session: Session, task_data: models.UpdateTaskRequest, user_uuid
     if task_data.assignee_uuid is not None:
         task.assigned_to = task_data.assignee_uuid
     if task_data.status is not None:
-        task.status = task_data.status.value
+        task.status = task_data.status
     if task_data.priority is not None:
-        task.priority = task_data.priority.value
+        task.priority = task_data.priority
     if task_data.due_date is not None:
         task.due_date = task_data.due_date
 
-    session.commit()
-    session.refresh(task)
+    session.add(task)
 
     return models.TaskRow(
         task_uuid=task.task_uuid,
@@ -146,12 +140,13 @@ def update_task(session: Session, task_data: models.UpdateTaskRequest, user_uuid
         creator_uuid=task.created_by,
         assignee_uuid=task.assigned_to,
         title=task.title,
-        description=task.description,
+        description=task.description or "",
         status=task.status,
         priority=task.priority,
         due_date=task.due_date,
-        created_at=task.created_at
+        created_at=task.created_at,
     )
+
 
 # Delete a task
 @write_session

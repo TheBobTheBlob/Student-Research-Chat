@@ -5,6 +5,7 @@ import Register from "@/pages/Register"
 import Profile from "@/pages/Profile"
 import { Toaster } from "@/components/ui/sonner"
 import Homepage from "@/pages/Homepage"
+import LandingPage from "@/pages/LandingPage"
 import { useAuthenticated } from "@/hooks/use-authenticated"
 import Chats from "@/pages/Chats"
 import Chat from "@/pages/Chat"
@@ -15,7 +16,7 @@ async function redirectToAppIfAuthenticated() {
         .then(() => true)
         .catch(() => false)
     if (isAuth) {
-        throw redirect({ to: appRoute.to })
+        throw redirect({ to: homeRoute.to })
     }
 }
 
@@ -32,7 +33,7 @@ const rootRoute = createRootRoute({
 export const indexRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: "/",
-    component: Homepage,
+    component: LandingPage,
     beforeLoad: async () => await redirectToAppIfAuthenticated(),
 })
 
@@ -46,6 +47,14 @@ export const appRoute = createRoute({
         } catch {
             throw redirect({ to: loginRoute.to, search: { redirect: location.href } })
         }
+    },
+})
+
+export const appIndexRoute = createRoute({
+    getParentRoute: () => appRoute,
+    path: "/",
+    beforeLoad: () => {
+        throw redirect({ to: homeRoute.to })
     },
 })
 
@@ -63,11 +72,18 @@ export const registerRoute = createRoute({
     beforeLoad: async () => await redirectToAppIfAuthenticated(),
 })
 
+export const homeRoute = createRoute({
+    getParentRoute: () => appRoute,
+    path: "home",
+    component: Homepage,
+})
+
 export const profileRoute = createRoute({
     getParentRoute: () => appRoute,
     path: "profile",
     component: Profile,
 })
+
 export const chatsRoute = createRoute({
     getParentRoute: () => appRoute,
     path: "chats",
@@ -81,15 +97,14 @@ export const chatRoute = createRoute({
 })
 
 export const tasksRoute = createRoute({
-    getParentRoute: () => rootRoute,
+    getParentRoute: () => appRoute,
     path: "/tasks",
     component: TasksPage,
 })
 
 export const routeTree = rootRoute.addChildren([
     indexRoute,
-    appRoute.addChildren([profileRoute, chatsRoute, chatRoute]),
+    appRoute.addChildren([appIndexRoute, homeRoute, profileRoute, chatsRoute, chatRoute, tasksRoute]),
     loginRoute,
     registerRoute,
-    tasksRoute,
 ])

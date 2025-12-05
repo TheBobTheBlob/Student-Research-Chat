@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 import datetime as dt
 import enum
 
@@ -27,7 +27,7 @@ class TaskRow(BaseModel):
     task_uuid: str
     chat_uuid: str
     creator_uuid: str
-    assignee_uuid: int | None
+    assignee_uuid: str | None
     title: str
     description: str
     status: TaskStatus
@@ -44,3 +44,9 @@ class UpdateTaskRequest(BaseModel):
     status: TaskStatus | None = None
     priority: TaskPriority | None = None
     due_date: dt.date | None = None
+
+    @field_validator("due_date", mode="before")
+    def none_due_date(cls, v):
+        if isinstance(v, str) and v == "":
+            return None
+        return v

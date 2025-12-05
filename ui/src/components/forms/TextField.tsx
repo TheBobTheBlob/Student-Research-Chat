@@ -9,9 +9,10 @@ interface TextFieldProps {
     name: string
     label: string
     type?: string
+    placeholder?: string
 }
 
-export default function TextField({ form, name, label, type }: TextFieldProps) {
+export default function TextField({ form, name, label, type, placeholder }: TextFieldProps) {
     return (
         <form.Field
             name={name}
@@ -30,6 +31,7 @@ export default function TextField({ form, name, label, type }: TextFieldProps) {
                             onChange={(e) => field.handleChange(e.target.value)}
                             aria-invalid={isInvalid}
                             autoComplete="off"
+                            placeholder={placeholder}
                         />
                         {isInvalid && <FieldError errors={field.state.meta.errors} />}
                     </Field>

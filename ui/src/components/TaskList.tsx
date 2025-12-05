@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
-import { EditTask } from "./forms/EditTask"
+import { TaskDetails } from "./forms/TaskDetails"
 import { useFetch } from "@/hooks/use-fetch"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 interface Task {
     task_uuid: string
@@ -21,7 +22,15 @@ interface TaskListProps {
 }
 
 export function TaskList({ chat_uuid: chatUUID }: TaskListProps) {
-    const [editingTask, setEditingTask] = useState<Task | null>(null)
+    const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+
+    const userQuery = useQuery({
+        queryKey: ["current_user"],
+        queryFn: async () => {
+            const response = await useFetch({ url: "/users/authenticate", data: {} })
+            return response
+        },
+    })
 
     const tasksQuery = useQuery({
         queryKey: ["tasks", chatUUID ?? "all-user"],
@@ -40,29 +49,41 @@ export function TaskList({ chat_uuid: chatUUID }: TaskListProps) {
 
     const tasks = tasksQuery.data ?? []
 
-    if (tasks.length === 0) return <div className="text-sm text-muted-foreground">No tasks yet.</div>
+    if (tasks.length === 0) return <div className="text-sm text-muted-foreground px-2">No tasks yet.</div>
 
     return (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 px-2">
             {tasks.map((task: Task) => (
-                <div key={task.task_uuid} className="p-3 border rounded bg-muted/20">
-                    <div className="font-medium">{task.title}</div>
-                    <div className="text-xs text-muted-foreground">{task.status ?? "pending"}</div>
-
-                    {/* {task.creator_uuid === currentUserUuid && ( */}
-                    <button className="mt-2 text-sm text-blue-500" onClick={() => setEditingTask(task)}>
-                        Edit
-                    </button>
-                    {/* )} */}
+                <div
+                    key={task.task_uuid}
+                    className="group flex flex-col gap-2 rounded-lg border p-3 hover:bg-muted/50 transition-colors bg-card text-card-foreground shadow-sm cursor-pointer"
+                    onClick={() => setSelectedTask(task)}
+                >
+                    <div className="flex items-start justify-between gap-2">
+                        <div className="font-medium text-sm leading-tight pt-0.5">{task.title}</div>
+                    </div>
+                    <div>
+                        <span className="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-[10px] font-medium text-secondary-foreground ring-1 ring-inset ring-gray-500/10 uppercase tracking-wider">
+                            {task.status?.replace("_", " ") ?? "pending"}
+                        </span>
+                    </div>
                 </div>
             ))}
 
-            {editingTask && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
-                        <EditTask task={editingTask} onClose={() => setEditingTask(null)} />
-                    </div>
-                </div>
+            {selectedTask && (
+                <Dialog open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Task Details</DialogTitle>
+                            <DialogDescription>View and edit task details.</DialogDescription>
+                        </DialogHeader>
+                        <TaskDetails
+                            task={selectedTask}
+                            onClose={() => setSelectedTask(null)}
+                            canEdit={userQuery.data?.user_uuid === selectedTask.creator_uuid}
+                        />
+                    </DialogContent>
+                </Dialog>
             )}
         </div>
     )

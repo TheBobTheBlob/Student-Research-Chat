@@ -31,7 +31,6 @@ import { TaskForm } from "@/components/forms/TaskForm"
 import { TaskList } from "@/components/TaskList"
 
 export default function Chat() {
-    const queryClient = useQueryClient()
     const { chatUUID } = useParams({ strict: false })
     const bottomRef = useRef<HTMLDivElement>(null)
 
@@ -79,22 +78,6 @@ export default function Chat() {
                                       isOwn={msg.user_uuid === messagesQuery.data.current_user_uuid}
                                   />
                               ))}
-
-                        {/* Tasks Section */}
-                        <div className="tasks-section mt-6 p-4 border-t">
-                            <h3 className="font-bold text-lg mb-2">Tasks</h3>
-
-                            {chatUUID ? (
-                                <TaskForm
-                                    chat_uuid={chatUUID}
-                                    onTaskCreated={() => {
-                                        queryClient.invalidateQueries({ queryKey: ["tasks", chatUUID] })
-                                    }}
-                                />
-                            ) : null}
-
-                            <TaskList chat_uuid={chatUUID} />
-                        </div>
 
                         <div ref={bottomRef} />
                     </div>
@@ -338,12 +321,19 @@ interface UserListProps {
 }
 
 function UserList({ chatInformationQuery }: UserListProps) {
+    const { chatUUID } = useParams({ strict: false })
+
     return (
         <Sidebar side="right" className="border-l border-border">
             <SidebarContent>
                 <SidebarGroup>
                     <SidebarGroupLabel>Actions</SidebarGroupLabel>
                     <AddUserDialog />
+                    <AddTaskDialog />
+                </SidebarGroup>
+                <SidebarGroup>
+                    <SidebarGroupLabel>Tasks</SidebarGroupLabel>
+                    <TaskList chat_uuid={chatUUID} />
                 </SidebarGroup>
                 <SidebarGroup className="gap-2">
                     <SidebarGroupLabel>Users</SidebarGroupLabel>
@@ -425,6 +415,39 @@ function AddUserDialog() {
                         Add User
                     </Button>
                 </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+function AddTaskDialog() {
+    const [dialogOpen, setDialogOpen] = useState<boolean>(false)
+    const { chatUUID } = useParams({ strict: false })
+    const queryClient = useQueryClient()
+
+    return (
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+                <SidebarMenuButton>
+                    <Plus />
+                    Add Task
+                </SidebarMenuButton>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Add Task</DialogTitle>
+                    <DialogDescription>Create a new task for this chat.</DialogDescription>
+                </DialogHeader>
+                {chatUUID && (
+                    <TaskForm
+                        chat_uuid={chatUUID}
+                        onTaskCreated={() => {
+                            queryClient.invalidateQueries({ queryKey: ["tasks", chatUUID] })
+                            setDialogOpen(false)
+                        }}
+                        onClose={() => setDialogOpen(false)}
+                    />
+                )}
             </DialogContent>
         </Dialog>
     )

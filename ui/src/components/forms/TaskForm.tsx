@@ -1,9 +1,11 @@
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { Button } from "@/components/ui/button"
 import { useFetch } from "@/hooks/use-fetch"
+import { DialogFooter } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 
-export function TaskForm({ chat_uuid, onTaskCreated }: { chat_uuid: string, onTaskCreated: () => void }) {
+export function TaskForm({ chat_uuid, onTaskCreated, onClose }: { chat_uuid: string; onTaskCreated: () => void; onClose: () => void }) {
     const [title, setTitle] = useState("")
     const queryClient = useQueryClient()
 
@@ -25,19 +27,14 @@ export function TaskForm({ chat_uuid, onTaskCreated }: { chat_uuid: string, onTa
     })
 
     return (
-        <div className="mb-4">
-            <input
-                className="border p-2 w-full rounded"
-                placeholder="New task title..."
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-            />
-            <Button
-                className="mt-2"
-                onClick={() => title.trim() && createTask.mutate()}
-            >
-                Add Task
-            </Button>
+        <div className="space-y-4">
+            <Input placeholder="New task title..." value={title} onChange={(e) => setTitle(e.target.value)} />
+            <DialogFooter>
+                <Button variant="outline" onClick={onClose}>
+                    Cancel
+                </Button>
+                <Button onClick={() => title.trim() && createTask.mutate()}>Add Task</Button>
+            </DialogFooter>
         </div>
     )
 }
