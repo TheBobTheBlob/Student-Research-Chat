@@ -1,15 +1,19 @@
 from pydantic import BaseModel
 import datetime as dt
-from app.models import users
 
 
 class CreateNoteRequest(BaseModel):
-    note_name: dict[int, users.UserRow]
+    name: str
     content: str
 
 
 class NoteRow(BaseModel):
     note_uuid: str
-    user_id: int
+    user_uuid: str
+    note_name: str
     content: str
     timestamp: dt.datetime
+
+
+class DeleteNoteRequest(BaseModel):
+    note_uuid: str

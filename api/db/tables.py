@@ -60,13 +60,15 @@ class Tasks(Base):
     due_date: Mapped[dt.date | None] = mapped_column(Date, nullable=True)
     created_at: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
 
+
 class Notes(Base):
     __tablename__ = "notes"
 
     note_uuid: Mapped[str] = mapped_column(String(100), primary_key=True, nullable=False)
     note_name: Mapped[str] = mapped_column(String(100), nullable=False)
-    content: Mapped[str] = mapped_column(String(1000), nullable=False)
+    content: Mapped[str] = mapped_column(String(5000), nullable=False)
     timestamp: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
+
 
 class NoteUsers(Base):
     __tablename__ = "notes_users"

@@ -58,7 +58,24 @@ class UserRemovedFromChatEvent(Event):
     user_uuid: str
 
 
+class NoteCreatedEvent(Event):
+    event_type: Literal["NOTE_CREATED"] = "NOTE_CREATED"
+
+    note_uuid: str
+    user_uuid: str
+    content: str
+    note_name: str
+    timestamp: str
+
+
+class NoteDeletedEvent(Event):
+    event_type: Literal["NOTE_DELETED"] = "NOTE_DELETED"
+
+    note_uuid: str
+    user_uuid: str
+
+
 EventUnion = Annotated[
-    Union[MessageCreatedEvent, UserRegisteredEvent, UserAddedToChatEvent, ChatDeletedEvent, UserRemovedFromChatEvent, TaskAddedToChatEvent],
+    Union[MessageCreatedEvent, UserRegisteredEvent, UserAddedToChatEvent, ChatDeletedEvent, UserRemovedFromChatEvent, TaskAddedToChatEvent, NoteCreatedEvent, NoteDeletedEvent],
     Field(discriminator="event_type"),
 ]

@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useFetch } from "@/hooks/use-fetch"
 import { TaskGrid } from "@/components/TaskGrid"
 
-export default function TasksPage() {
+export default function Tasks() {
     const tasksQuery = useQuery({
         queryKey: ["user_tasks"],
         queryFn: async () => {

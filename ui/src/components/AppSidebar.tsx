@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Calendar, CircleUser, Home, ListTodo, LogOut, MessageCircle, Plus } from "lucide-react"
+import { Calendar, CircleUser, Home, ListTodo, LogOut, MessageCircle, Notebook, Plus } from "lucide-react"
 import { useLocation, useNavigate } from "@tanstack/react-router"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import * as z from "zod"
@@ -21,7 +21,7 @@ import TextField from "./forms/TextField"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog"
 import { Button } from "./ui/button"
 import type { AppSidebarChatButton } from "./types"
-import { chatRoute, chatsRoute, homeRoute, profileRoute, tasksRoute } from "@/routes/routes"
+import { chatRoute, chatsRoute, homeRoute, notesRoute, profileRoute, tasksRoute } from "@/routes/routes"
 import { useLogout } from "@/hooks/use-logout"
 import { useFetch } from "@/hooks/use-fetch"
 import { cn } from "@/lib/utils"
@@ -41,6 +41,7 @@ export default function AppSidebar() {
         { title: "Home", icon: Home, to: homeRoute.to },
         { title: "Chats", icon: MessageCircle, to: chatsRoute.to },
         { title: "Tasks", icon: ListTodo, to: tasksRoute.to },
+        { title: "Notes", icon: Notebook, to: notesRoute.to },
         { title: "Meetings", icon: Calendar, to: "/meetings" },
     ]
 

@@ -14,6 +14,7 @@ from app.routers import messages
 from app.routers import tasks
 from app.routers import notes
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     for i in range(10):
@@ -62,4 +63,4 @@ app.include_router(users.router)
 app.include_router(chats.router)
 app.include_router(messages.router)
 app.include_router(tasks.router)
-app.include_routers(notes.router)
+app.include_router(notes.router)

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useFetch } from "@/hooks/use-fetch"
 import { ChatGrid } from "@/components/ChatGrid"
 import { TaskGrid } from "@/components/TaskGrid"
+import { NoteGrid } from "@/components/NoteGrid"
 
 export default function Homepage() {
     const chats = useQuery({
@@ -20,11 +21,19 @@ export default function Homepage() {
         },
     })
 
-    if (chats.isPending || tasksQuery.isPending) {
+    const notesQuery = useQuery({
+        queryKey: ["user_notes"],
+        queryFn: async () => {
+            const response = await useFetch({ url: "/notes/list", data: {} })
+            return response.notes ?? []
+        },
+    })
+
+    if (chats.isPending || tasksQuery.isPending || notesQuery.isPending) {
         return <div className="p-8 text-center text-muted-foreground">Loading dashboard...</div>
     }
 
-    if (chats.isError || tasksQuery.isError) {
+    if (chats.isError || tasksQuery.isError || notesQuery.isError) {
         return <div className="p-8 text-center text-destructive">Error loading dashboard.</div>
     }
 
@@ -38,6 +47,11 @@ export default function Homepage() {
             <section>
                 <h2 className="text-2xl font-bold mb-6">My Tasks</h2>
                 <TaskGrid tasks={tasksQuery.data.slice(0, 6)} />
+            </section>
+
+            <section>
+                <h2 className="text-2xl font-bold mb-6">My Notes</h2>
+                <NoteGrid notes={notesQuery.data.slice(0, 6)} />
             </section>
         </div>
     )

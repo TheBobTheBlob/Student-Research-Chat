@@ -1,6 +1,6 @@
 import logging
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
-import db.messages
+import db
 import datetime as dt
 import app.events as events
 from pydantic import TypeAdapter
@@ -67,6 +67,16 @@ async def consume_events():
                         db.chats.delete_chat(chat_uuid=e.chat_uuid)
                     case events.UserRemovedFromChatEvent() as e:
                         db.chats.remove_user_from_chat(chat_uuid=e.chat_uuid, user_uuid=e.user_uuid)
+                    case events.NoteCreatedEvent() as e:
+                        db.notes.new_note(
+                            note_uuid=e.note_uuid,
+                            user_uuid=e.user_uuid,
+                            name=e.note_name,
+                            content=e.content,
+                            timestamp=dt.datetime.fromisoformat(e.timestamp),
+                        )
+                    case events.NoteDeletedEvent() as e:
+                        db.notes.delete_note(note_uuid=e.note_uuid)
                     case _:
                         logging.warning(f"Unhandled event type: {type(event)}")
 
