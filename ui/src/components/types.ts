@@ -22,7 +22,7 @@ export interface TaskUpdateRequest {
     title?: string;
     description?: string;
     assignee_uuid?: string;
-    status?: 'to_do' | 'done';
+    status?: 'to_do' | 'in_progress' | 'done';
     priority?: 'low' | 'medium' | 'high';
     due_date?: string; // ISO date string
 }

@@ -55,7 +55,7 @@ class Tasks(Base):
     description: Mapped[str | None] = mapped_column(String(2000), nullable=True)
     created_by: Mapped[str] = mapped_column(String(100), nullable=False)
     assigned_to: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    status: Mapped[str] = mapped_column(Enum("to_do", "done"),default="to_do",nullable=False)
+    status: Mapped[str] = mapped_column(Enum("to_do", "in_progress", "done"),default="to_do",nullable=False)
     priority: Mapped[str] = mapped_column(Enum("low", "medium", "high"),default="medium",nullable=False)
     due_date: Mapped[dt.datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
