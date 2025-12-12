@@ -150,9 +150,10 @@ def update_task(session: Session, task_data: models.UpdateTaskRequest, user_uuid
 
 # Delete a task
 @write_session
-def delete_task(session: Session, task_uuid: str) -> bool:
-    task = session.query(tables.Tasks).filter(tables.Tasks.task_uuid == task_uuid).first()
+def delete_task(session: Session, task_uuid: str, user_uuid: int) -> bool:
+    task = session.query(tables.Tasks).filter(tables.Tasks.task_uuid == task_uuid,tables.Tasks.created_by == user_uuid).first()
     if not task:
         return False
     session.delete(task)
     return True
+
