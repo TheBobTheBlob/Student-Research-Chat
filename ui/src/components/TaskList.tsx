@@ -1,36 +1,17 @@
 import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
-import { TaskDetails } from "./forms/TaskDetails"
+import type { TaskRow } from "@/components/types"
+import { TaskDialog } from "@/components/dialogs/TaskDialog"
 import { useFetch } from "@/hooks/use-fetch"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-
-interface Task {
-    task_uuid: string
-    chat_uuid?: string
-    creator_uuid: string
-    assignee_uuid?: string
-    title: string
-    description?: string
-    status?: string
-    priority?: string
-    due_date?: string
-    created_at?: string
-}
+import { appRoute } from "@/routes/routes"
 
 interface TaskListProps {
-    chat_uuid?: string
+    chatUUID?: string
 }
 
-export function TaskList({ chat_uuid: chatUUID }: TaskListProps) {
-    const [selectedTask, setSelectedTask] = useState<Task | null>(null)
-
-    const userQuery = useQuery({
-        queryKey: ["current_user"],
-        queryFn: async () => {
-            const response = await useFetch({ url: "/users/authenticate", data: {} })
-            return response
-        },
-    })
+export function TaskList({ chatUUID }: TaskListProps) {
+    const [selectedTask, setSelectedTask] = useState<TaskRow | null>(null)
+    const { currentUser } = appRoute.useRouteContext()
 
     const tasksQuery = useQuery({
         queryKey: ["tasks", chatUUID ?? "all-user"],
@@ -53,10 +34,10 @@ export function TaskList({ chat_uuid: chatUUID }: TaskListProps) {
 
     return (
         <div className="flex flex-col gap-2 px-2">
-            {tasks.map((task: Task) => (
+            {tasks.map((task: TaskRow) => (
                 <div
                     key={task.task_uuid}
-                    className="group flex flex-col gap-2 rounded-lg border p-3 hover:bg-muted/50 transition-colors bg-card text-card-foreground shadow-sm cursor-pointer"
+                    className="group flex flex-col gap-1 rounded-lg border py-2 px-2.5 hover:bg-muted/50 transition-colors bg-card text-card-foreground shadow-sm cursor-pointer"
                     onClick={() => setSelectedTask(task)}
                 >
                     <div className="flex items-start justify-between gap-2">
@@ -70,21 +51,13 @@ export function TaskList({ chat_uuid: chatUUID }: TaskListProps) {
                 </div>
             ))}
 
-            {selectedTask && (
-                <Dialog open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
-                    <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                            <DialogTitle>Task Details</DialogTitle>
-                            <DialogDescription>View and edit task details.</DialogDescription>
-                        </DialogHeader>
-                        <TaskDetails
-                            task={selectedTask}
-                            onClose={() => setSelectedTask(null)}
-                            canEdit={userQuery.data?.user_uuid === selectedTask.creator_uuid}
-                        />
-                    </DialogContent>
-                </Dialog>
-            )}
+            <TaskDialog
+                task={selectedTask}
+                open={!!selectedTask}
+                onOpenChange={(open) => !open && setSelectedTask(null)}
+                onClose={() => setSelectedTask(null)}
+                canEdit={currentUser.user_uuid === selectedTask?.creator_uuid}
+            />
         </div>
     )
 }

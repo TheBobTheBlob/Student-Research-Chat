@@ -1,31 +1,39 @@
 from fastapi import APIRouter, Depends
 import db
-import app.models.users as users
 from app.dependencies import get_current_user
-from fastapi.security import HTTPBearer
 from fastapi import HTTPException
-import app.models.chats as chats
 import app.events as events
 from app.kafka_service import send_event, TOPIC_CHAT_EVENTS
 import app.models as models
+import uuid
+import datetime as dt
 
 router = APIRouter(prefix="/chats")
-security = HTTPBearer(auto_error=False)
 
 
 @router.post("/new")
-async def new_chat(chat: chats.CreateChatRequest, current_user: users.UserRow = Depends(get_current_user)):
-    chat_uuid = db.chats.new_chat(current_user.user_uuid, chat.name)
+async def new_chat(chat: models.chats.CreateChatRequest, current_user: models.users.UserRow = Depends(get_current_user)):
+    chat_uuid = str(uuid.uuid4())
+    timestamp = dt.datetime.now(dt.timezone.utc)
+
+    event = events.ChatCreatedEvent(
+        chat_uuid=chat_uuid,
+        chat_name=chat.name,
+        created_by_user_uuid=current_user.user_uuid,
+        timestamp=timestamp.isoformat(),
+    )
+
+    await send_event(TOPIC_CHAT_EVENTS, event)
     return {"message": "New chat created", "chat_uuid": chat_uuid}
 
 
 @router.post("/list")
-async def user_chat_list(current_user: users.UserRow = Depends(get_current_user)):
+async def user_chat_list(current_user: models.users.UserRow = Depends(get_current_user)):
     return db.chats.get_user_chats(current_user.user_uuid)
 
 
 @router.post("/info")
-async def chat_info(chat: chats.ChatInfoRequest, current_user: users.UserRow = Depends(get_current_user)):
+async def chat_info(chat: models.chats.ChatInfoRequest, current_user: models.users.UserRow = Depends(get_current_user)):
     try:
         chat_info = db.chats.get_chat_info(chat.chat_uuid)
     except ValueError:
@@ -35,7 +43,7 @@ async def chat_info(chat: chats.ChatInfoRequest, current_user: users.UserRow = D
 
 
 @router.post("/add-user")
-async def add_user_to_chat(request: chats.AddUserToChatRequest, current_user: users.UserRow = Depends(get_current_user)):
+async def add_user_to_chat(request: models.chats.AddUserToChatRequest, current_user: models.users.UserRow = Depends(get_current_user)):
     try:
         user = db.users.get_user_by_email(request.user_email)
     except ValueError:
@@ -57,7 +65,7 @@ async def add_user_to_chat(request: chats.AddUserToChatRequest, current_user: us
 
 
 @router.post("/delete")
-async def delete_chat(chat: chats.ChatInfoRequest, current_user: users.UserRow = Depends(get_current_user)):
+async def delete_chat(chat: models.chats.ChatInfoRequest, current_user: models.users.UserRow = Depends(get_current_user)):
     chat_users = db.chats.get_chat_user_relations(chat.chat_uuid, include_removed=False)
     user_uuids = [chat_user.user_uuid for chat_user in chat_users]
 
@@ -78,7 +86,7 @@ async def delete_chat(chat: chats.ChatInfoRequest, current_user: users.UserRow =
 
 
 @router.post("/leave")
-async def leave_chat(chat: chats.ChatInfoRequest, current_user: users.UserRow = Depends(get_current_user)):
+async def leave_chat(chat: models.chats.ChatInfoRequest, current_user: models.users.UserRow = Depends(get_current_user)):
     chat_users = db.chats.get_chat_user_relations(chat.chat_uuid, include_removed=False)
     user_uuids = [chat_user.user_uuid for chat_user in chat_users]
 

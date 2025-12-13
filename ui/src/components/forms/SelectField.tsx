@@ -22,7 +22,7 @@ export default function SelectField({ form, name, label, options }: SelectFieldP
                     <Field orientation="responsive" data-invalid={isInvalid}>
                         <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
                         <Select name={field.name} value={field.state.value} onValueChange={field.handleChange}>
-                            <SelectTrigger id="form-tanstack-select-language" aria-invalid={isInvalid} className="min-w-[120px]">
+                            <SelectTrigger id={field.name} aria-invalid={isInvalid} className="min-w-[120px]">
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent position="item-aligned">

@@ -1,7 +1,6 @@
 import app.models as models
 from db import tables
 from db.helpers import read_session, write_session
-import uuid
 import datetime as dt
 import db.users as users
 
@@ -9,10 +8,7 @@ from sqlalchemy.orm import Session
 
 
 @write_session
-def new_chat(session: Session, user_uuid: str, name: str) -> str:
-    chat_uuid = str(uuid.uuid4())
-    time = dt.datetime.now(dt.timezone.utc)
-
+def new_chat(session: Session, chat_uuid: str, user_uuid: str, name: str, time: dt.datetime) -> None:
     new_chat = tables.Chats(
         chat_uuid=chat_uuid,
         chat_name=name,
@@ -27,8 +23,6 @@ def new_chat(session: Session, user_uuid: str, name: str) -> str:
         role=models.users.ChatRole.admin,
     )
     session.add(new_chat_user)
-
-    return chat_uuid
 
 
 @read_session

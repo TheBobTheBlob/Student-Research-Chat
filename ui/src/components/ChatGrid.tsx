@@ -13,11 +13,11 @@ export function ChatGrid({ chats }: ChatGridProps) {
     }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {chats.map((chat: any) => (
                 <Link key={chat.chat_uuid} to={chatRoute.to} params={{ chatUUID: chat.chat_uuid }} className="block group">
-                    <Card className="h-full transition-all duration-200 hover:shadow-md hover:border-blue-500/30 group-hover:bg-blue-50/50 dark:group-hover:bg-blue-950/20">
-                        <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-6">
+                    <Card className="h-full transition-all duration-200 hover:shadow-md hover:border-blue-500/30 group-hover:bg-blue-50/50 dark:group-hover:bg-blue-950/20 py-3">
+                        <CardHeader className="flex flex-row items-center gap-3 space-y-0 pb-3 px-3">
                             <div className="p-3 bg-blue-100 text-blue-600 rounded-full group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300 dark:bg-blue-900/30 dark:text-blue-400 dark:group-hover:bg-blue-600 dark:group-hover:text-white">
                                 <MessageCircle className="w-6 h-6" />
                             </div>

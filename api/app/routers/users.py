@@ -1,17 +1,17 @@
 from fastapi import APIRouter, HTTPException
 from app.dependencies import get_current_user
 import db
-import app.models.users as users
 from fastapi import Depends, Response
 import app.events as events
 from app.kafka_service import send_event, TOPIC_CHAT_EVENTS
 import uuid
+import app.models as models
 
 router = APIRouter(prefix="/users")
 
 
 @router.post("/register")
-async def register_user(user: users.CreateUserRequest):
+async def register_user(user: models.users.CreateUserRequest):
     user_uuid = str(uuid.uuid4())
     event = events.UserRegisteredEvent(
         user_uuid=user_uuid,
@@ -19,7 +19,7 @@ async def register_user(user: users.CreateUserRequest):
         last_name=user.last_name,
         email=user.email,
         password=user.password,
-        user_type=users.UserType(user.user_type.value),
+        user_type=models.users.UserType(user.user_type.value),
     )
 
     await send_event(TOPIC_CHAT_EVENTS, event)
@@ -27,7 +27,7 @@ async def register_user(user: users.CreateUserRequest):
 
 
 @router.post("/login")
-async def login_user(user: users.LoginRequest, response: Response):
+async def login_user(user: models.users.LoginRequest, response: Response):
     try:
         token = db.users.authenticate_user(user)
     except ValueError:
@@ -43,6 +43,6 @@ async def logout_user(response: Response):
     return {"message": "Logout successful"}
 
 
-@router.post("/authenticate", response_model=users.UserRow)
-async def authenticate_user(current_user: users.UserRow = Depends(get_current_user)):
+@router.post("/authenticate", response_model=models.users.UserRow)
+async def authenticate_user(current_user: models.users.UserRow = Depends(get_current_user)):
     return current_user

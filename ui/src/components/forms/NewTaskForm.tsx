@@ -5,7 +5,13 @@ import { useFetch } from "@/hooks/use-fetch"
 import { DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 
-export function TaskForm({ chat_uuid, onTaskCreated, onClose }: { chat_uuid: string; onTaskCreated: () => void; onClose: () => void }) {
+interface NewTaskFormProps {
+    chat_uuid: string
+    onTaskCreated: () => void
+    onClose: () => void
+}
+
+export function NewTaskForm({ chat_uuid, onTaskCreated, onClose }: NewTaskFormProps) {
     const [title, setTitle] = useState("")
     const queryClient = useQueryClient()
 

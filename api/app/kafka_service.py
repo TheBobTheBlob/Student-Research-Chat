@@ -56,6 +56,13 @@ async def consume_events():
                             email=e.email,
                             user_type=e.user_type,
                         )
+                    case events.ChatCreatedEvent() as e:
+                        db.chats.new_chat(
+                            chat_uuid=e.chat_uuid,
+                            name=e.chat_name,
+                            user_uuid=e.created_by_user_uuid,
+                            time=dt.datetime.fromisoformat(e.timestamp),
+                        )
                     case events.UserAddedToChatEvent() as e:
                         db.chats.add_user_to_chat(
                             chat_uuid=e.chat_uuid,
@@ -64,6 +71,8 @@ async def consume_events():
                     case events.ChatDeletedEvent() as e:
                         db.messages.remove_all_messages_from_chat(chat_uuid=e.chat_uuid)
                         db.chats.delete_all_users_from_chat(chat_uuid=e.chat_uuid)
+                        db.announcements.delete_announcements_from_chat(chat_uuid=e.chat_uuid)
+                        db.meetings.delete_meetings_from_chat(chat_uuid=e.chat_uuid)
                         db.chats.delete_chat(chat_uuid=e.chat_uuid)
                     case events.UserRemovedFromChatEvent() as e:
                         db.chats.remove_user_from_chat(chat_uuid=e.chat_uuid, user_uuid=e.user_uuid)
@@ -77,6 +86,46 @@ async def consume_events():
                         )
                     case events.NoteDeletedEvent() as e:
                         db.notes.delete_note(note_uuid=e.note_uuid)
+                    case events.AnnouncementCreatedEvent() as e:
+                        users = db.chats.get_chat_users(e.chat_uuid, include_removed=False)
+                        db.announcements.new_announcement(
+                            announcement_uuid=e.announcement_uuid,
+                            chat_uuid=e.chat_uuid,
+                            title=e.title,
+                            content=e.content,
+                            users_uuids=[user.user_uuid for user in users],
+                            time=dt.datetime.fromisoformat(e.timestamp),
+                        )
+                    case events.AnnouncementMarkedAsReadEvent() as e:
+                        db.announcements.mark_announcement_as_read(
+                            announcement_uuid=e.announcement_uuid,
+                            user_uuid=e.user_uuid,
+                            time=dt.datetime.now(dt.timezone.utc),
+                        )
+                    case events.AnnouncementMarkedAsUnreadEvent() as e:
+                        db.announcements.mark_announcement_as_unread(
+                            announcement_uuid=e.announcement_uuid,
+                            user_uuid=e.user_uuid,
+                            time=dt.datetime.now(dt.timezone.utc),
+                        )
+                    case events.MeetingCreatedEvent() as e:
+                        db.meetings.create_meeting(
+                            meeting_uuid=e.meeting_uuid,
+                            title=e.title,
+                            description=e.description,
+                            start_time=dt.datetime.fromisoformat(e.start_time),
+                            end_time=dt.datetime.fromisoformat(e.end_time),
+                            created_by_user_uuid=e.created_by_user_uuid,
+                            chat_uuid=e.chat_uuid,
+                            created_at=dt.datetime.fromisoformat(e.timestamp),
+                        )
+                    case events.MeetingResponseEvent() as e:
+                        db.meetings.update_response(
+                            meeting_uuid=e.meeting_uuid,
+                            user_uuid=e.user_uuid,
+                            status=e.status,
+                            updated_at=dt.datetime.fromisoformat(e.timestamp),
+                        )
                     case _:
                         logging.warning(f"Unhandled event type: {type(event)}")
 

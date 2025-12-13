@@ -17,8 +17,6 @@ export default function Notes() {
         },
     })
 
-    console.log(notesQuery)
-
     if (notesQuery.isLoading) {
         return <div className="p-8 text-center text-muted-foreground">Loading notes...</div>
     }

@@ -21,6 +21,41 @@ docker compose up
 
 Then visit the application at [http://localhost:4173/](http://localhost:4173/).
 
+### Testing
+
+All tests are located in the `tests/` folder. This project uses Playwright for End-to-End (E2E) testing.
+
+#### Prerequisites
+
+Before running tests, ensure the application is running via Docker:
+
+```bash
+docker compose up -d
+```
+
+Then, install the testing dependencies inside the `tests` folder:
+
+```bash
+cd tests
+npm install
+npx playwright install
+```
+
+#### Running Tests
+
+To run all E2E tests (can also be run with the Playwright UI):
+
+```bash
+npm run test
+npm run test:ui
+```
+
+The Playwright test report can be viewed with:
+
+```bash
+npm run report
+```
+
 ### Contributing
 
 For new features, create a new branch and then develop your feature on that branch. Then open a pull request to the `dev` branch. For small changes and bug fixes, develop them directly on `dev`. Once `dev` is stable, open a pull request into the `main` branch.

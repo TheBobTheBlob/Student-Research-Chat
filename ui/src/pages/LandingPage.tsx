@@ -70,7 +70,7 @@ export default function LandingPage() {
                                 description="Instant messaging designed for research groups. Share ideas, files, and updates seamlessly."
                             />
                             <FeatureCard
-                                icon={<CheckCircle2 className="w-10 h-10 text-green-500" />}
+                                icon={<CheckCircle2 className="w-10 h-10 text-emerald-500" />}
                                 title="Task Management"
                                 description="Keep your project on track. Assign tasks, set deadlines, and monitor progress in one place."
                             />
@@ -80,7 +80,7 @@ export default function LandingPage() {
                                 description="Built for groups. Manage roles, organize discussions, and keep everyone aligned."
                             />
                             <FeatureCard
-                                icon={<StickyNote className="w-10 h-10 text-yellow-500" />}
+                                icon={<StickyNote className="w-10 h-10 text-amber-500" />}
                                 title="Personal Notes"
                                 description="Capture your thoughts instantly. Create, organize, and manage your personal research notes."
                             />

@@ -13,6 +13,8 @@ from app.routers import chats
 from app.routers import messages
 from app.routers import tasks
 from app.routers import notes
+from app.routers import meetings
+from app.routers import announcements
 
 
 @asynccontextmanager
@@ -64,3 +66,5 @@ app.include_router(chats.router)
 app.include_router(messages.router)
 app.include_router(tasks.router)
 app.include_router(notes.router)
+app.include_router(meetings.router)
+app.include_router(announcements.router)

@@ -1,26 +1,26 @@
 name: Build Docker Images
 
 on:
-  push:
-    branches: [ "main", "dev" ]
-  pull_request:
-    branches: [ "main", "dev" ]
+    push:
+        branches: ["main", "dev"]
+    pull_request:
+        branches: ["main", "dev"]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+    build:
+        runs-on: ubuntu-latest
 
-    steps:
-    - uses: actions/checkout@v4
+        steps:
+            - uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+            - name: Set up Docker Build
+              uses: docker/setup-buildx-action@v3
 
-    - name: Build with Docker Compose
-      run: docker compose build
+            - name: Build with Docker Compose
+              run: docker compose build
 
-    - name: Run and verify services
-      run: |
-        docker compose up -d --wait
-        docker compose ps
-        docker compose logs
+            - name: Run and verify services
+              run: |
+                  docker compose up -d --wait
+                  docker compose ps
+                  docker compose logs

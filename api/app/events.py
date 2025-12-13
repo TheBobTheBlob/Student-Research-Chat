@@ -7,6 +7,15 @@ class Event(BaseModel):
     pass
 
 
+class ChatCreatedEvent(Event):
+    event_type: Literal["CHAT_CREATED"] = "CHAT_CREATED"
+
+    chat_uuid: str
+    chat_name: str
+    created_by_user_uuid: str
+    timestamp: str
+
+
 class MessageCreatedEvent(Event):
     event_type: Literal["MESSAGE_CREATED"] = "MESSAGE_CREATED"
 
@@ -75,7 +84,69 @@ class NoteDeletedEvent(Event):
     user_uuid: str
 
 
+class AnnouncementCreatedEvent(Event):
+    event_type: Literal["ANNOUNCEMENT_CREATED"] = "ANNOUNCEMENT_CREATED"
+
+    announcement_uuid: str
+    chat_uuid: str
+    title: str
+    content: str
+    created_by_user_uuid: str
+    timestamp: str
+
+
+class AnnouncementMarkedAsReadEvent(Event):
+    event_type: Literal["ANNOUNCEMENT_MARKED_AS_READ"] = "ANNOUNCEMENT_MARKED_AS_READ"
+
+    announcement_uuid: str
+    user_uuid: str
+
+
+class AnnouncementMarkedAsUnreadEvent(Event):
+    event_type: Literal["ANNOUNCEMENT_MARKED_AS_UNREAD"] = "ANNOUNCEMENT_MARKED_AS_UNREAD"
+
+    announcement_uuid: str
+    user_uuid: str
+
+
+class MeetingCreatedEvent(Event):
+    event_type: Literal["MEETING_CREATED"] = "MEETING_CREATED"
+
+    meeting_uuid: str
+    title: str
+    description: str
+    start_time: str
+    end_time: str
+    created_by_user_uuid: str
+    chat_uuid: str | None
+    timestamp: str
+
+
+class MeetingResponseEvent(Event):
+    event_type: Literal["MEETING_RESPONSE"] = "MEETING_RESPONSE"
+
+    meeting_uuid: str
+    user_uuid: str
+    status: models.meetings.MeetingResponseStatus
+    timestamp: str
+
+
 EventUnion = Annotated[
-    Union[MessageCreatedEvent, UserRegisteredEvent, UserAddedToChatEvent, ChatDeletedEvent, UserRemovedFromChatEvent, TaskAddedToChatEvent, NoteCreatedEvent, NoteDeletedEvent],
+    Union[
+        ChatCreatedEvent,
+        MessageCreatedEvent,
+        UserRegisteredEvent,
+        UserAddedToChatEvent,
+        ChatDeletedEvent,
+        UserRemovedFromChatEvent,
+        TaskAddedToChatEvent,
+        NoteCreatedEvent,
+        NoteDeletedEvent,
+        AnnouncementCreatedEvent,
+        AnnouncementMarkedAsReadEvent,
+        AnnouncementMarkedAsUnreadEvent,
+        MeetingCreatedEvent,
+        MeetingResponseEvent,
+    ],
     Field(discriminator="event_type"),
 ]
