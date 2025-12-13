@@ -25,7 +25,7 @@ async def new_task(
 
 
 @router.post("/list")
-async def list_tasks(chat_uuid: str, current_user: users.UserRow = Depends(get_current_user)):
+async def list_tasks(chat_uuid: str | None, current_user: users.UserRow = Depends(get_current_user)):
     task_rows = db.tasks.all_tasks(chat_uuid=chat_uuid)
     return {"message": "Tasks listed", "tasks": task_rows, "current_user_uuid": current_user.user_uuid}
 

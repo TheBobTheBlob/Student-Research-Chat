@@ -3,6 +3,7 @@ import { useFetch } from "@/hooks/use-fetch"
 import { ChatGrid } from "@/components/ChatGrid"
 import { TaskGrid } from "@/components/TaskGrid"
 import { NoteGrid } from "@/components/NoteGrid"
+import { AnnouncementList } from "@/components/AnnouncementList"
 
 export default function Homepage() {
     const chats = useQuery({
@@ -38,21 +39,30 @@ export default function Homepage() {
     }
 
     return (
-        <div className="p-6 max-w-7xl mx-auto w-full space-y-12">
-            <section>
-                <h2 className="text-2xl font-bold mb-6">Recent Chats</h2>
-                <ChatGrid chats={chats.data.slice(0, 6)} />
-            </section>
+        <div className="p-6 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="lg:col-span-3 space-y-12">
+                <section>
+                    <h2 className="text-2xl font-bold mb-6">Recent Chats</h2>
+                    <ChatGrid chats={chats.data.slice(0, 6)} />
+                </section>
 
-            <section>
-                <h2 className="text-2xl font-bold mb-6">My Tasks</h2>
-                <TaskGrid tasks={tasksQuery.data.slice(0, 6)} />
-            </section>
+                <section>
+                    <h2 className="text-2xl font-bold mb-6">My Tasks</h2>
+                    <TaskGrid tasks={tasksQuery.data.slice(0, 6)} />
+                </section>
 
-            <section>
-                <h2 className="text-2xl font-bold mb-6">My Notes</h2>
-                <NoteGrid notes={notesQuery.data.slice(0, 6)} />
-            </section>
+                <section>
+                    <h2 className="text-2xl font-bold mb-6">My Notes</h2>
+                    <NoteGrid notes={notesQuery.data.slice(0, 6)} />
+                </section>
+            </div>
+
+            <div className="lg:col-span-1">
+                <section className="sticky top-6">
+                    <h2 className="text-2xl font-bold mb-6">Announcements</h2>
+                    <AnnouncementList onlyUnread />
+                </section>
+            </div>
         </div>
     )
 }

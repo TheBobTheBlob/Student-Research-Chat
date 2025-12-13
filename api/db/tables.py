@@ -76,3 +76,44 @@ class NoteUsers(Base):
     note_uuid: Mapped[str] = mapped_column(String(100), nullable=False, primary_key=True)
     user_uuid: Mapped[str] = mapped_column(String(100), nullable=False, primary_key=True)
     created_at: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
+
+
+class Meetings(Base):
+    __tablename__ = "meetings"
+
+    meeting_uuid: Mapped[str] = mapped_column(String(100), primary_key=True, nullable=False)
+    chat_uuid: Mapped[str] = mapped_column(String(100), nullable=False)
+    scheduled_time: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
+    duration_minutes: Mapped[int] = mapped_column(nullable=False)
+
+
+class MeetingUsers(Base):
+    __tablename__ = "meeting_users"
+
+    meeting_uuid: Mapped[str] = mapped_column(String(100), nullable=False, primary_key=True)
+    user_uuid: Mapped[str] = mapped_column(String(100), nullable=False, primary_key=True)
+    response_status: Mapped[models.meetings.ResponseStatus] = mapped_column(
+        Enum(models.meetings.ResponseStatus), default=models.meetings.ResponseStatus.pending, nullable=False
+    )
+    responded_at: Mapped[dt.datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+class Announcements(Base):
+    __tablename__ = "announcements"
+
+    announcement_uuid: Mapped[str] = mapped_column(String(100), primary_key=True, nullable=False)
+    chat_uuid: Mapped[str] = mapped_column(String(100), nullable=False)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    content: Mapped[str] = mapped_column(String(5000), nullable=False)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
+
+
+class AnnouncementUsers(Base):
+    __tablename__ = "announcement_users"
+
+    announcement_uuid: Mapped[str] = mapped_column(String(100), nullable=False, primary_key=True)
+    user_uuid: Mapped[str] = mapped_column(String(100), nullable=False, primary_key=True)
+    status: Mapped[models.announcements.AnnouncementStatus] = mapped_column(
+        Enum(models.announcements.AnnouncementStatus), default=models.announcements.AnnouncementStatus.unread, nullable=False
+    )
+    updated_at: Mapped[dt.datetime | None] = mapped_column(DateTime, nullable=True)

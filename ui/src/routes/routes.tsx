@@ -11,6 +11,7 @@ import Chats from "@/pages/Chats"
 import Chat from "@/pages/Chat"
 import Tasks from "@/pages/Tasks"
 import Notes from "@/pages/Notes"
+import Announcements from "@/pages/Announcements"
 
 async function redirectToAppIfAuthenticated() {
     const isAuth = await useAuthenticated()
@@ -44,7 +45,8 @@ export const appRoute = createRoute({
     component: App,
     beforeLoad: async () => {
         try {
-            await useAuthenticated()
+            const user = await useAuthenticated()
+            return { currentUser: user }
         } catch {
             throw redirect({ to: loginRoute.to, search: { redirect: location.href } })
         }
@@ -109,9 +111,15 @@ export const notesRoute = createRoute({
     component: Notes,
 })
 
+export const annoucementsRoute = createRoute({
+    getParentRoute: () => appRoute,
+    path: "/announcements",
+    component: Announcements,
+})
+
 export const routeTree = rootRoute.addChildren([
     indexRoute,
-    appRoute.addChildren([appIndexRoute, homeRoute, profileRoute, chatsRoute, chatRoute, tasksRoute, notesRoute]),
+    appRoute.addChildren([appIndexRoute, homeRoute, profileRoute, chatsRoute, chatRoute, tasksRoute, notesRoute, annoucementsRoute]),
     loginRoute,
     registerRoute,
 ])

@@ -1,3 +1,3 @@
-from . import users, chats, messages, tasks, notes
+from . import announcements, users, chats, messages, tasks, notes, meetings
 
-__all__ = ["users", "chats", "messages", "tasks", "notes"]
+__all__ = ["users", "chats", "messages", "tasks", "notes", "meetings", "announcements"]

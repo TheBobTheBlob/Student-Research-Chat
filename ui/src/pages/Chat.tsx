@@ -1,34 +1,15 @@
 import { useEffect, useRef, useState } from "react"
-import { LogOutIcon, MoreHorizontalIcon, Plus, SendHorizonal, Trash2Icon } from "lucide-react"
+import { SendHorizonal } from "lucide-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useNavigate, useParams } from "@tanstack/react-router"
-import { useForm } from "@tanstack/react-form"
-import * as z from "zod"
-import { toast } from "sonner"
-import type { UseQueryResult } from "@tanstack/react-query"
+import { useParams } from "@tanstack/react-router"
 import type { UserAvatarProps } from "@/components/UserAvatar"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useFetch } from "@/hooks/use-fetch"
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupAction, SidebarGroupLabel, SidebarMenuButton } from "@/components/ui/sidebar"
-import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
-import { FieldGroup } from "@/components/ui/field"
-import TextField from "@/components/forms/TextField"
 import UserAvatar from "@/components/UserAvatar"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { chatsRoute } from "@/routes/routes"
 import { cn } from "@/lib/utils"
-import { TaskForm } from "@/components/forms/TaskForm"
-import { TaskList } from "@/components/TaskList"
+import { ChatHeader } from "@/components/chat/ChatHeader"
+import { ChatSidebar } from "@/components/chat/ChatSidebar"
 
 export default function Chat() {
     const { chatUUID } = useParams({ strict: false })
@@ -60,8 +41,6 @@ export default function Chat() {
         }
     }, [messagesQuery.data?.messages])
 
-    console.log(messagesQuery)
-
     return (
         <>
             <div className="flex flex-row h-screen">
@@ -85,7 +64,7 @@ export default function Chat() {
                     </div>
                     <ChatInput />
                 </div>
-                <UserList chatInformationQuery={chatInformationQuery} />
+                <ChatSidebar chatInformationQuery={chatInformationQuery} />
             </div>
         </>
     )
@@ -130,136 +109,6 @@ function ChatMessage({ user, text, time, isOwn }: ChatMessageType) {
             </div>
             {isOwn ? <MessageAvatar /> : null}
         </div>
-    )
-}
-
-interface ChatHeaderProps {
-    chatInformationQuery: UseQueryResult<any, unknown>
-}
-
-function ChatHeader({ chatInformationQuery }: ChatHeaderProps) {
-    return (
-        <div className="flex gap-2 items-center px-4 h-14 sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-            <h2 className="flex-1 text-lg font-semibold">
-                {chatInformationQuery.isPending ? "Chat" : chatInformationQuery.data.chat_name}
-            </h2>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="outline">
-                        <MoreHorizontalIcon />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuGroup>
-                        <LeaveChatDialog />
-                        <DeleteChatDialog />
-                    </DropdownMenuGroup>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        </div>
-    )
-}
-
-function LeaveChatDialog() {
-    const queryClient = useQueryClient()
-    const navigate = useNavigate()
-    const { chatUUID } = useParams({ strict: false })
-    const [dialogOpen, setDialogOpen] = useState<boolean>(false)
-
-    const leaveChat = useMutation({
-        mutationFn: async () => {
-            const response = await useFetch({ url: "/chats/leave", data: { chat_uuid: chatUUID } })
-            return response
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["chats"] })
-            toast.success("Successfully left the chat.")
-            navigate({ to: chatsRoute.to })
-            setDialogOpen(false)
-        },
-        onError: (error: any) => {
-            toast.error(error.message)
-            setDialogOpen(false)
-        },
-    })
-
-    return (
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <LogOutIcon />
-                    Leave Chat
-                </DropdownMenuItem>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Are you sure you want to leave this chat?</DialogTitle>
-                    <DialogDescription>
-                        You will use access to this chat and all the messages within unless you are reinvited.
-                    </DialogDescription>
-                </DialogHeader>
-
-                <DialogFooter>
-                    <DialogClose asChild>
-                        <Button variant="outline">Cancel</Button>
-                    </DialogClose>
-                    <Button variant="destructive" onClick={() => leaveChat.mutateAsync()}>
-                        <LogOutIcon />
-                        Leave
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    )
-}
-
-function DeleteChatDialog() {
-    const queryClient = useQueryClient()
-    const navigate = useNavigate()
-    const { chatUUID } = useParams({ strict: false })
-    const [dialogOpen, setDialogOpen] = useState<boolean>(false)
-
-    const deleteChat = useMutation({
-        mutationFn: async () => {
-            const response = await useFetch({ url: "/chats/delete", data: { chat_uuid: chatUUID } })
-            return response
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["chats"] })
-            toast.success("Chat deleted successfully.")
-            navigate({ to: chatsRoute.to })
-            setDialogOpen(false)
-        },
-        onError: (error: any) => {
-            toast.error(error.message)
-            setDialogOpen(false)
-        },
-    })
-
-    return (
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <Trash2Icon />
-                    Delete Chat
-                </DropdownMenuItem>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Are you sure you want to delete this chat?</DialogTitle>
-                    <DialogDescription>This will irreversibly delete this chat and all messages within.</DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                    <DialogClose asChild>
-                        <Button variant="outline">Cancel</Button>
-                    </DialogClose>
-                    <Button variant="destructive" onClick={() => deleteChat.mutateAsync()}>
-                        <Trash2Icon />
-                        Delete
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
     )
 }
 
@@ -311,155 +160,5 @@ function ChatInput() {
                 </Button>
             </div>
         </div>
-    )
-}
-
-interface UserListProps {
-    chatInformationQuery: UseQueryResult<any, unknown>
-}
-
-function UserList({ chatInformationQuery }: UserListProps) {
-    const { chatUUID } = useParams({ strict: false })
-
-    return (
-        <Sidebar side="right" className="border-l border-border">
-            <SidebarContent>
-                <div className="h-14" />
-                <SidebarGroup>
-                    <SidebarGroupLabel>Tasks</SidebarGroupLabel>
-                    <SidebarGroupAction title="Add Task">
-                        <AddTaskDialog />
-                    </SidebarGroupAction>
-                    <TaskList chat_uuid={chatUUID} />
-                </SidebarGroup>
-                <SidebarGroup className="gap-2">
-                    <SidebarGroupLabel>Users</SidebarGroupLabel>
-                    <SidebarGroupAction title="Add User">
-                        <AddUserDialog />
-                    </SidebarGroupAction>
-                    {chatInformationQuery.isPending
-                        ? "Loading..."
-                        : Object.entries(chatInformationQuery.data?.users)
-                              .filter(([_, user]: [any, any]) => user.role !== "removed")
-                              .map(([userUUID, user]: [any, any]) => <UserTag key={userUUID} user={user} />)}
-                </SidebarGroup>
-            </SidebarContent>
-        </Sidebar>
-    )
-}
-
-const newChatFormSchema = z.object({
-    email: z.email(),
-})
-
-function AddUserDialog() {
-    const queryClient = useQueryClient()
-    const { chatUUID } = useParams({ strict: false })
-    const [dialogOpen, setDialogOpen] = useState<boolean>(false)
-
-    const form = useForm({
-        defaultValues: {
-            email: "",
-        },
-        validators: {
-            onSubmit: newChatFormSchema,
-        },
-        onSubmit: ({ value }) => {
-            addUser.mutateAsync(value.email)
-        },
-    })
-
-    const addUser = useMutation({
-        mutationFn: async (email: string) => {
-            const response = await useFetch({ url: "/chats/add-user", data: { user_email: email, chat_uuid: chatUUID } })
-            return response
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["chat", chatUUID] })
-            toast.success("User added successfully.")
-            form.reset()
-            setDialogOpen(false)
-        },
-        onError: (error: any) => toast.error(error.message),
-    })
-
-    return (
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-                <Plus onClick={() => setDialogOpen(true)} />
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Add User to Chat</DialogTitle>
-                    <DialogDescription>Add another user to this group chat.</DialogDescription>
-                </DialogHeader>
-                <form
-                    id="add-user-form"
-                    onSubmit={(e) => {
-                        e.preventDefault()
-                        form.handleSubmit()
-                    }}
-                >
-                    <FieldGroup>
-                        <TextField form={form} name="email" label="Email" />
-                    </FieldGroup>
-                </form>
-                <DialogFooter>
-                    <DialogClose asChild>
-                        <Button variant="outline">Cancel</Button>
-                    </DialogClose>
-                    <Button type="submit" form="add-user-form">
-                        Add User
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    )
-}
-
-function AddTaskDialog() {
-    const [dialogOpen, setDialogOpen] = useState<boolean>(false)
-    const { chatUUID } = useParams({ strict: false })
-    const queryClient = useQueryClient()
-
-    return (
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-                <Plus onClick={() => setDialogOpen(true)} />
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Add Task</DialogTitle>
-                    <DialogDescription>Create a new task for this chat.</DialogDescription>
-                </DialogHeader>
-                {chatUUID && (
-                    <TaskForm
-                        chat_uuid={chatUUID}
-                        onTaskCreated={() => {
-                            queryClient.invalidateQueries({ queryKey: ["tasks", chatUUID] })
-                            setDialogOpen(false)
-                        }}
-                        onClose={() => setDialogOpen(false)}
-                    />
-                )}
-            </DialogContent>
-        </Dialog>
-    )
-}
-
-interface UserTagProps {
-    user: { first_name: string; last_name: string }
-}
-
-function UserTag({ user }: UserTagProps) {
-    return (
-        <SidebarMenuButton className="h-auto py-0.5">
-            <UserAvatar user={user} className="h-8 w-8" />
-            <div className="flex flex-col items-start text-sm">
-                <span className="font-medium">
-                    {user.first_name} {user.last_name}
-                </span>
-            </div>
-        </SidebarMenuButton>
     )
 }
