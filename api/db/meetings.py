@@ -80,3 +80,11 @@ def update_response(
             updated_at=updated_at,
         )
         session.add(response)
+
+
+@write_session
+def delete_meetings_from_chat(session: Session, chat_uuid: str) -> None:
+    meetings = session.query(tables.Meetings).filter(tables.Meetings.chat_uuid == chat_uuid).all()
+    for meeting in meetings:
+        session.query(tables.MeetingResponses).filter(tables.MeetingResponses.meeting_uuid == meeting.meeting_uuid).delete()
+        session.query(tables.Meetings).filter(tables.Meetings.meeting_uuid == meeting.meeting_uuid).delete()
