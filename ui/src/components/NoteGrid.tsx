@@ -36,10 +36,10 @@ function NoteCard({ note }: { note: any }) {
     return (
         <>
             <Card
-                className="h-full transition-all duration-200 hover:shadow-md hover:border-amber-500/30 hover:bg-amber-50/50 dark:hover:bg-amber-950/20 group relative cursor-pointer"
+                className="h-full transition-all duration-200 hover:shadow-md hover:border-amber-500/30 hover:bg-amber-50/50 dark:hover:bg-amber-950/20 group relative cursor-pointer py-3"
                 onClick={() => setIsViewDialogOpen(true)}
             >
-                <CardHeader className="flex flex-row items-start gap-4 space-y-0 pb-2">
+                <CardHeader className="flex flex-row items-start gap-3 space-y-0 pb-1 px-3">
                     <div className="p-2 bg-amber-100 text-amber-600 rounded-full group-hover:bg-amber-600 group-hover:text-white transition-colors duration-300 dark:bg-amber-900/30 dark:text-amber-400 dark:group-hover:bg-amber-600 dark:group-hover:text-white mt-1">
                         <StickyNote className="w-5 h-5" />
                     </div>
@@ -61,7 +61,7 @@ function NoteCard({ note }: { note: any }) {
                         <Trash2 className="w-4 h-4" />
                     </Button>
                 </CardHeader>
-                <CardContent className="pb-4">
+                <CardContent className="pb-2 px-3">
                     <p className="text-sm text-muted-foreground line-clamp-4 whitespace-pre-wrap">{note.content}</p>
                 </CardContent>
             </Card>
@@ -105,7 +105,7 @@ export function NoteGrid({ notes }: NoteGridProps) {
     }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {notes.map((note: any) => (
                 <NoteCard key={note.note_uuid} note={note} />
             ))}

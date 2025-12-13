@@ -78,26 +78,6 @@ class NoteUsers(Base):
     created_at: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
 
 
-class Meetings(Base):
-    __tablename__ = "meetings"
-
-    meeting_uuid: Mapped[str] = mapped_column(String(100), primary_key=True, nullable=False)
-    chat_uuid: Mapped[str] = mapped_column(String(100), nullable=False)
-    scheduled_time: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
-    duration_minutes: Mapped[int] = mapped_column(nullable=False)
-
-
-class MeetingUsers(Base):
-    __tablename__ = "meeting_users"
-
-    meeting_uuid: Mapped[str] = mapped_column(String(100), nullable=False, primary_key=True)
-    user_uuid: Mapped[str] = mapped_column(String(100), nullable=False, primary_key=True)
-    response_status: Mapped[models.meetings.ResponseStatus] = mapped_column(
-        Enum(models.meetings.ResponseStatus), default=models.meetings.ResponseStatus.pending, nullable=False
-    )
-    responded_at: Mapped[dt.datetime | None] = mapped_column(DateTime, nullable=True)
-
-
 class Announcements(Base):
     __tablename__ = "announcements"
 
@@ -117,3 +97,30 @@ class AnnouncementUsers(Base):
         Enum(models.announcements.AnnouncementStatus), default=models.announcements.AnnouncementStatus.unread, nullable=False
     )
     updated_at: Mapped[dt.datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+class Meetings(Base):
+    __tablename__ = "meetings"
+
+    meeting_uuid: Mapped[str] = mapped_column(String(100), primary_key=True, nullable=False)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[str] = mapped_column(String(5000), nullable=False)
+    start_time: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
+    end_time: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
+    created_by_user_uuid: Mapped[str] = mapped_column(String(100), nullable=False)
+    chat_uuid: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    status: Mapped[models.meetings.MeetingStatus] = mapped_column(
+        Enum(models.meetings.MeetingStatus), default=models.meetings.MeetingStatus.scheduled, nullable=False
+    )
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)
+
+
+class MeetingResponses(Base):
+    __tablename__ = "meeting_responses"
+
+    meeting_uuid: Mapped[str] = mapped_column(String(100), nullable=False, primary_key=True)
+    user_uuid: Mapped[str] = mapped_column(String(100), nullable=False, primary_key=True)
+    status: Mapped[models.meetings.MeetingResponseStatus] = mapped_column(
+        Enum(models.meetings.MeetingResponseStatus), default=models.meetings.MeetingResponseStatus.pending, nullable=False
+    )
+    updated_at: Mapped[dt.datetime] = mapped_column(DateTime, nullable=False)

@@ -107,6 +107,24 @@ async def consume_events():
                             user_uuid=e.user_uuid,
                             time=dt.datetime.now(dt.timezone.utc),
                         )
+                    case events.MeetingCreatedEvent() as e:
+                        db.meetings.create_meeting(
+                            meeting_uuid=e.meeting_uuid,
+                            title=e.title,
+                            description=e.description,
+                            start_time=dt.datetime.fromisoformat(e.start_time),
+                            end_time=dt.datetime.fromisoformat(e.end_time),
+                            created_by_user_uuid=e.created_by_user_uuid,
+                            chat_uuid=e.chat_uuid,
+                            created_at=dt.datetime.fromisoformat(e.timestamp),
+                        )
+                    case events.MeetingResponseEvent() as e:
+                        db.meetings.update_response(
+                            meeting_uuid=e.meeting_uuid,
+                            user_uuid=e.user_uuid,
+                            status=e.status,
+                            updated_at=dt.datetime.fromisoformat(e.timestamp),
+                        )
                     case _:
                         logging.warning(f"Unhandled event type: {type(event)}")
 

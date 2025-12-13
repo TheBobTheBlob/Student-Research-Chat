@@ -17,14 +17,14 @@ export function TaskGrid({ tasks }: TaskGridProps) {
 
     return (
         <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {tasks.map((task: any) => (
                     <Card
                         key={task.task_uuid}
-                        className="h-full transition-all duration-200 hover:shadow-md hover:border-emerald-500/30 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 group cursor-pointer"
+                        className="h-full transition-all duration-200 hover:shadow-md hover:border-emerald-500/30 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 group cursor-pointer py-3"
                         onClick={() => setSelectedTask(task)}
                     >
-                        <CardHeader className="flex flex-row items-start gap-4 space-y-0 pb-2">
+                        <CardHeader className="flex flex-row items-start gap-3 space-y-0 pb-1 px-3">
                             <div className="p-2 bg-emerald-100 text-emerald-600 rounded-full group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300 dark:bg-emerald-900/30 dark:text-emerald-400 dark:group-hover:bg-emerald-600 dark:group-hover:text-white mt-1">
                                 {task.status === "completed" ? (
                                     <CheckCircle2 className="w-5 h-5" />
@@ -54,11 +54,11 @@ export function TaskGrid({ tasks }: TaskGridProps) {
                             </div>
                         </CardHeader>
                         {task.description && (
-                            <CardContent className="pb-2">
+                            <CardContent className="pb-1 px-3">
                                 <p className="text-sm text-muted-foreground line-clamp-3">{task.description}</p>
                             </CardContent>
                         )}
-                        <CardContent className="pt-0 pb-4">
+                        <CardContent className="pt-0 pb-2 px-3">
                             <div className="flex flex-wrap gap-2 mt-2">
                                 {task.priority && (
                                     <div

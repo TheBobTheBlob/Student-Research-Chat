@@ -49,7 +49,7 @@ export function AnnouncementList({ chatUUID, onlyUnread }: AnnouncementListProps
                     <div
                         key={announcement.announcement_uuid}
                         className={
-                            "group flex flex-col gap-2 rounded-lg border p-3 hover:bg-muted/50 transition-colors bg-card text-card-foreground shadow-sm cursor-pointer"
+                            "group flex flex-col gap-1 rounded-lg border py-2 px-2.5 hover:bg-muted/50 transition-colors bg-card text-card-foreground shadow-sm cursor-pointer"
                         }
                         onClick={() => setSelectedAnnouncement(announcement)}
                     >
@@ -58,14 +58,14 @@ export function AnnouncementList({ chatUUID, onlyUnread }: AnnouncementListProps
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-6 w-6 shrink-0"
+                                className="h-5 w-5 shrink-0"
                                 onClick={(e) => toggleStatus(e, announcement)}
                                 title={announcement.status === "unread" ? "Mark as read" : "Mark as unread"}
                             >
                                 {announcement.status === "unread" ? (
-                                    <Circle className="h-4 w-4 text-blue-500 fill-blue-500/20" />
+                                    <Circle className="h-3.5 w-3.5 text-blue-500 fill-blue-500/20" />
                                 ) : (
-                                    <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+                                    <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />
                                 )}
                             </Button>
                         </div>

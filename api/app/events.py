@@ -109,6 +109,28 @@ class AnnouncementMarkedAsUnreadEvent(Event):
     user_uuid: str
 
 
+class MeetingCreatedEvent(Event):
+    event_type: Literal["MEETING_CREATED"] = "MEETING_CREATED"
+
+    meeting_uuid: str
+    title: str
+    description: str
+    start_time: str
+    end_time: str
+    created_by_user_uuid: str
+    chat_uuid: str | None
+    timestamp: str
+
+
+class MeetingResponseEvent(Event):
+    event_type: Literal["MEETING_RESPONSE"] = "MEETING_RESPONSE"
+
+    meeting_uuid: str
+    user_uuid: str
+    status: models.meetings.MeetingResponseStatus
+    timestamp: str
+
+
 EventUnion = Annotated[
     Union[
         ChatCreatedEvent,
@@ -123,6 +145,8 @@ EventUnion = Annotated[
         AnnouncementCreatedEvent,
         AnnouncementMarkedAsReadEvent,
         AnnouncementMarkedAsUnreadEvent,
+        MeetingCreatedEvent,
+        MeetingResponseEvent,
     ],
     Field(discriminator="event_type"),
 ]

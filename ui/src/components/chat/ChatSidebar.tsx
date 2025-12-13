@@ -24,8 +24,10 @@ import TextField from "@/components/forms/TextField"
 import UserAvatar from "@/components/UserAvatar"
 import { TaskList } from "@/components/TaskList"
 import { AnnouncementList } from "@/components/AnnouncementList"
+import { MeetingList } from "@/components/MeetingList"
 import { AddTaskDialog } from "@/components/dialogs/AddTaskDialog"
 import { AddAnnouncementDialog } from "@/components/dialogs/AddAnnouncementDialog"
+import { AddMeetingDialog } from "@/components/dialogs/AddMeetingDialog"
 import { appRoute } from "@/routes/routes"
 
 interface ChatSidebarProps {
@@ -48,6 +50,15 @@ export function ChatSidebar({ chatInformationQuery }: ChatSidebarProps) {
                         </SidebarGroupAction>
                     ) : null}
                     <AnnouncementList chatUUID={chatUUID} onlyUnread />
+                </SidebarGroup>
+                <SidebarGroup>
+                    <SidebarGroupLabel>Meetings</SidebarGroupLabel>
+                    {currentUser.user_type === "professor" ? (
+                        <SidebarGroupAction title="Add Meeting">
+                            <AddMeetingDialog />
+                        </SidebarGroupAction>
+                    ) : null}
+                    <MeetingList chatUUID={chatUUID} />
                 </SidebarGroup>
                 <SidebarGroup>
                     <SidebarGroupLabel>Tasks</SidebarGroupLabel>

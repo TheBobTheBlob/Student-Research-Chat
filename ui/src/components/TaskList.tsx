@@ -37,7 +37,7 @@ export function TaskList({ chatUUID }: TaskListProps) {
             {tasks.map((task: TaskRow) => (
                 <div
                     key={task.task_uuid}
-                    className="group flex flex-col gap-2 rounded-lg border p-3 hover:bg-muted/50 transition-colors bg-card text-card-foreground shadow-sm cursor-pointer"
+                    className="group flex flex-col gap-1 rounded-lg border py-2 px-2.5 hover:bg-muted/50 transition-colors bg-card text-card-foreground shadow-sm cursor-pointer"
                     onClick={() => setSelectedTask(task)}
                 >
                     <div className="flex items-start justify-between gap-2">

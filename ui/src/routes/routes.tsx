@@ -13,6 +13,8 @@ import Tasks from "@/pages/Tasks"
 import Notes from "@/pages/Notes"
 import Announcements from "@/pages/Announcements"
 
+import Meetings from "@/pages/Meetings"
+
 async function redirectToAppIfAuthenticated() {
     const isAuth = await useAuthenticated()
         .then(() => true)
@@ -117,9 +119,15 @@ export const annoucementsRoute = createRoute({
     component: Announcements,
 })
 
+export const meetingsRoute = createRoute({
+    getParentRoute: () => appRoute,
+    path: "/meetings",
+    component: Meetings,
+})
+
 export const routeTree = rootRoute.addChildren([
     indexRoute,
-    appRoute.addChildren([appIndexRoute, homeRoute, profileRoute, chatsRoute, chatRoute, tasksRoute, notesRoute, annoucementsRoute]),
+    appRoute.addChildren([appIndexRoute, homeRoute, profileRoute, chatsRoute, chatRoute, tasksRoute, notesRoute, annoucementsRoute, meetingsRoute]),
     loginRoute,
     registerRoute,
 ])

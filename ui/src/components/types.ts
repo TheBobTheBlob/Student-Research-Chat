@@ -35,3 +35,15 @@ export interface TaskUpdateRequest {
     priority?: "low" | "medium" | "high"
     due_date?: string // ISO date string
 }
+
+export interface MeetingRow {
+    meeting_uuid: string
+    title: string
+    description: string
+    start_time: string
+    end_time: string
+    created_by_user_uuid: string
+    chat_uuid?: string
+    created_at: string
+    user_response: "attending" | "not_attending" | "maybe" | "pending"
+}
