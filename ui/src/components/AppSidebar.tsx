@@ -64,7 +64,7 @@ export default function AppSidebar() {
             <SidebarHeader>
                 <div className="flex items-center gap-2 px-2 py-3 text-sidebar-foreground">
                     <MessageCircle className="size-6" />
-                    <span className="font-semibold group-data-[collapsible=icon]:hidden">Student Chat</span>
+                    <span className="font-semibold group-data-[collapsible=icon]:hidden">StudentChat</span>
                 </div>
             </SidebarHeader>
             <SidebarContent>

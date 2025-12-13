@@ -1,4 +1,4 @@
-import { Outlet, createRootRoute, createRoute, redirect } from "@tanstack/react-router"
+import { HeadContent, Outlet, createRootRoute, createRoute, redirect } from "@tanstack/react-router"
 import App from "@/App"
 import Login from "@/pages/Login"
 import Register from "@/pages/Register"
@@ -24,9 +24,20 @@ async function redirectToAppIfAuthenticated() {
     }
 }
 
+function pageTitle(title?: string) {
+    return () => ({
+        meta: [
+            {
+                title: title ? `${title} - StudentChat` : "StudentChat",
+            },
+        ],
+    })
+}
+
 const rootRoute = createRootRoute({
     component: () => (
         <>
+            <HeadContent />
             <Outlet />
             <Toaster position="bottom-right" expand richColors />
         </>
@@ -39,6 +50,7 @@ export const indexRoute = createRoute({
     path: "/",
     component: LandingPage,
     beforeLoad: async () => await redirectToAppIfAuthenticated(),
+    head: pageTitle(),
 })
 
 export const appRoute = createRoute({
@@ -68,6 +80,7 @@ export const loginRoute = createRoute({
     path: "/login",
     component: Login,
     beforeLoad: async () => await redirectToAppIfAuthenticated(),
+    head: pageTitle("Login"),
 })
 
 export const registerRoute = createRoute({
@@ -75,59 +88,78 @@ export const registerRoute = createRoute({
     path: "/register",
     component: Register,
     beforeLoad: async () => await redirectToAppIfAuthenticated(),
+    head: pageTitle("Register"),
 })
 
 export const homeRoute = createRoute({
     getParentRoute: () => appRoute,
     path: "home",
     component: Homepage,
+    head: pageTitle("Home"),
 })
 
 export const profileRoute = createRoute({
     getParentRoute: () => appRoute,
     path: "profile",
     component: Profile,
+    head: pageTitle("Profile"),
 })
 
 export const chatsRoute = createRoute({
     getParentRoute: () => appRoute,
     path: "chats",
     component: Chats,
+    head: pageTitle("Chats"),
 })
 
 export const chatRoute = createRoute({
     getParentRoute: () => appRoute,
     path: "chat/$chatUUID",
     component: Chat,
+    head: pageTitle("Chat"),
 })
 
 export const tasksRoute = createRoute({
     getParentRoute: () => appRoute,
     path: "/tasks",
     component: Tasks,
+    head: pageTitle("Tasks"),
 })
 
 export const notesRoute = createRoute({
     getParentRoute: () => appRoute,
     path: "/notes",
     component: Notes,
+    head: pageTitle("Notes"),
 })
 
 export const annoucementsRoute = createRoute({
     getParentRoute: () => appRoute,
     path: "/announcements",
     component: Announcements,
+    head: pageTitle("Announcements"),
 })
 
 export const meetingsRoute = createRoute({
     getParentRoute: () => appRoute,
     path: "/meetings",
     component: Meetings,
+    head: pageTitle("Meetings"),
 })
 
 export const routeTree = rootRoute.addChildren([
     indexRoute,
-    appRoute.addChildren([appIndexRoute, homeRoute, profileRoute, chatsRoute, chatRoute, tasksRoute, notesRoute, annoucementsRoute, meetingsRoute]),
+    appRoute.addChildren([
+        appIndexRoute,
+        homeRoute,
+        profileRoute,
+        chatsRoute,
+        chatRoute,
+        tasksRoute,
+        notesRoute,
+        annoucementsRoute,
+        meetingsRoute,
+    ]),
     loginRoute,
     registerRoute,
 ])
