@@ -5,10 +5,33 @@
     "scripts": {
         "test": "playwright test",
         "test:ui": "playwright test --ui",
-        "report": "playwright show-report"
+        "report": "playwright show-report",
+        "coverage": "nyc report --reporter=html --reporter=text -t .nyc_output --report-dir coverage --exclude-after-remap false"
     },
     "devDependencies": {
+        "@istanbuljs/nyc-config-typescript": "^1.0.2",
         "@playwright/test": "^1.57.0",
-        "@types/node": "^25.0.1"
+        "@types/node": "^25.0.1",
+        "nyc": "^17.1.0",
+        "vite-plugin-istanbul": "^7.2.1"
+    },
+    "nyc": {
+        "report-dir": "coverage",
+        "temp-dir": ".nyc_output",
+        "include": [
+            "../ui/src/**/*.{ts,tsx}"
+        ],
+        "extension": [
+            ".ts",
+            ".tsx"
+        ],
+        "exclude": [
+            "**/*.d.ts",
+            "**/*.test.{ts,tsx}",
+            "**/*.spec.{ts,tsx}"
+        ],
+        "instrument": false,
+        "sourceMap": false,
+        "all": true
     }
 }

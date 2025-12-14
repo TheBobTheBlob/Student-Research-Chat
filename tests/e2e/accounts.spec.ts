@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { createTestUser } from "./utils/api-helpers";
 
 test("Register as Student", async ({ page }) => {

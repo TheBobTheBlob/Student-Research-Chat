@@ -89,7 +89,7 @@ function ChatMessage({ user, text, time, isOwn }: ChatMessageType) {
     }
 
     return (
-        <div className={cn("flex gap-3 items-end mb-4", isOwn ? "justify-end" : "justify-start")}>
+        <div className={cn("chat-message", "flex gap-3 items-end mb-4", isOwn ? "justify-end" : "justify-start")}>
             {!isOwn ? <MessageAvatar /> : null}
             <div className={cn("max-w-[70%] flex flex-col", isOwn ? "items-end" : "items-start")}>
                 <div className="flex items-center gap-2 mb-1 px-1">
@@ -100,6 +100,7 @@ function ChatMessage({ user, text, time, isOwn }: ChatMessageType) {
                 </div>
                 <div
                     className={cn(
+                        "chat-message--text",
                         "rounded-2xl px-4 py-2 shadow-sm text-sm whitespace-pre-wrap break-words",
                         isOwn ? "bg-blue-600 text-white rounded-br-sm" : "bg-muted text-foreground rounded-bl-sm",
                     )}
@@ -154,6 +155,7 @@ function ChatInput() {
                     onClick={handleSend}
                     size="icon"
                     className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white rounded-full h-10 w-10"
+                    data-testid="send-message-button"
                 >
                     <SendHorizonal className="h-5 w-5" />
                     <span className="sr-only">Send</span>

@@ -31,7 +31,7 @@ export function ChatHeader({ chatInformationQuery }: ChatHeaderProps) {
             </h2>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="outline">
+                    <Button variant="outline" data-testid="chat-header-menu-button">
                         <MoreHorizontalIcon />
                     </Button>
                 </DropdownMenuTrigger>
