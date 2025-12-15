@@ -50,8 +50,8 @@ async def update_task(task_request: tasks.UpdateTaskRequest, current_user: users
 
 
 @router.post("/delete")
-async def delete_task(task_request: tasks.UpdateTaskRequest, current_user: users.UserRow = Depends(get_current_user)):
-    success = db.tasks.delete_task(task_request.task_uuid)
+async def delete_task(task_request: tasks.DeleteTaskRequest,current_user: users.UserRow = Depends(get_current_user)):
+    success = db.tasks.delete_task(task_request.task_uuid, current_user.user_uuid)
     if not success:
         raise HTTPException(status_code=404, detail="Task not found")
     return {"message": "Task deleted successfully"}

@@ -43,6 +43,24 @@ export function TaskDetails({ task, onClose, canEdit = false, defaultEditing = f
         },
     })
 
+    const deleteTask = useMutation({
+        mutationFn: async () => {
+            const response = await useFetch({
+                url: "/tasks/delete",
+                data: { task_uuid: task.task_uuid },
+            })
+            return response
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tasks"] })
+            toast.success("Task deleted.")
+            onClose()
+        },
+        onError: () => {
+            toast.error("Failed to delete task.")
+        },
+    })
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         await updateTask.mutateAsync({
@@ -107,6 +125,21 @@ export function TaskDetails({ task, onClose, canEdit = false, defaultEditing = f
             </FieldSet>
 
             <DialogFooter>
+                {canEdit &&  (
+                    <div className="w-full flex justify-between items-center">
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            onClick={(e) => {
+                                e.preventDefault()
+                                deleteTask.mutate()
+                            }}
+                            disabled={deleteTask.isPending}
+                        >
+                            {deleteTask.isPending ? "Deleting..." : "Delete"}
+                        </Button>
+                    </div>
+                )}
                 {isEditing ? (
                     <>
                         <Button

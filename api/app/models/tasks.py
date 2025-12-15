@@ -51,3 +51,6 @@ class UpdateTaskRequest(BaseModel):
         if isinstance(v, str) and v == "":
             return None
         return v
+
+class DeleteTaskRequest(BaseModel):
+    task_uuid: str
